@@ -1,0 +1,9 @@
+{
+    "name": "com.sirenix.odininspector",
+    "displayName": "OdinInspector",
+    "version": "3.3.0",
+    "unity": "2018.3",
+    "keywords": [
+    ],
+    "category": "Unity"
+}

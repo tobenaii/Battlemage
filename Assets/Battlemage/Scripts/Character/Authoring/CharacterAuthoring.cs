@@ -1,3 +1,4 @@
+using Battlemage.Character.Data;
 using Unity.CharacterController;
 using Unity.Collections;
 using Unity.Entities;

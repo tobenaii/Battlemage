@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66911d27a6e74a48b81af25b91850629, type: 3}
+  m_Name: DealDamage
+  m_EditorClassIdentifier: 
+  _attributeModifiers:
+  - ModAttribute: {fileID: 6329282609969150329, guid: 5ea288a816aeba04cac3ab27d4f31385,
+      type: 2}
+    OperationType: 1
+    SourceValue: 0
+    SourceAttribute: {fileID: -7418593688890573939, guid: 786b441a9091c704e90d0502098e2f3f,
+      type: 2}
+    SourceValueType: 1

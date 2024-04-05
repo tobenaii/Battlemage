@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 577874318210893197}
+  - component: {fileID: 2776641233280097961}
   - component: {fileID: -7432371681024480149}
   - component: {fileID: -7819097431772662503}
   - component: {fileID: 6729084813064277831}
-  - component: {fileID: 2776641233280097961}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -35,6 +35,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2776641233280097961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 577874318210893199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0df5f31894984102b6b7cfd5527bb89d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &-7432371681024480149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,7 +75,7 @@ MonoBehaviour:
   SupportedGhostModes: 3
   OptimizationMode: 0
   Importance: 1
-  prefabId: 8c22dcbefac332745a1efbea69cb8bfc
+  prefabId: b4df941e35cb4ca1ac0e5b8e45410b1b
   HasOwner: 1
   SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 1
@@ -92,16 +104,3 @@ MonoBehaviour:
     PrefabType: -1
     SendTypeOptimization: -1
     VariantHash: 10188360468653526834
---- !u!114 &2776641233280097961
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 577874318210893199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0df5f31894984102b6b7cfd5527bb89d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ControlledCharacter: {fileID: 0}

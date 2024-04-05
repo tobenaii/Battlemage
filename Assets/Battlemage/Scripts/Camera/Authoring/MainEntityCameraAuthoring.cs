@@ -1,6 +1,6 @@
+using Battlemage.Camera.Data;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Battlemage.Camera.Authoring
 {

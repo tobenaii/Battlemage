@@ -1,5 +1,21 @@
 {
   "dependencies": {
+    "com.bovinelabs.core": {
+      "version": "https://github.com/tertle/com.bovinelabs.core.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.entities": "1.2.0",
+        "com.unity.logging": "1.2.0"
+      },
+      "hash": "bca81b0a650b8a982d0a341f08895e9e5ee8e0a7"
+    },
+    "com.sirenix.odininspector": {
+      "version": "file:com.sirenix.odininspector",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.addressables": {
       "version": "2.0.8",
       "depth": 1,
@@ -66,9 +82,9 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.entities": {
-      "version": "1.2.0",
-      "depth": 1,
-      "source": "registry",
+      "version": "https://github.com/tertle/com.unity.entities.git",
+      "depth": 0,
+      "source": "git",
       "dependencies": {
         "com.unity.burst": "1.8.12",
         "com.unity.serialization": "3.1.1",
@@ -83,7 +99,7 @@
         "com.unity.scriptablebuildpipeline": "1.21.21",
         "com.unity.profiling.core": "1.0.2"
       },
-      "url": "https://packages.unity.com"
+      "hash": "98d5631356d7a3bfbd5f3b37afec15193f640cd6"
     },
     "com.unity.entities.graphics": {
       "version": "1.2.0",
@@ -137,6 +153,16 @@
       "dependencies": {
         "com.unity.addressables": "1.21.9",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.logging": {
+      "version": "1.2.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.burst": "1.8.12",
+        "com.unity.collections": "2.4.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -275,7 +301,7 @@
     },
     "com.unity.scriptablebuildpipeline": {
       "version": "2.1.2",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -289,7 +315,7 @@
     },
     "com.unity.serialization": {
       "version": "3.1.1",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.collections": "2.1.4",
@@ -326,7 +352,7 @@
     },
     "com.unity.test-framework.performance": {
       "version": "3.0.3",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.test-framework": "1.1.31",
