@@ -95,8 +95,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1555240849038293810}
+  - component: {fileID: 164188671062393559}
   - component: {fileID: 2674214978767437844}
-  - component: {fileID: 8155422237044903022}
   - component: {fileID: 8494599271149049586}
   - component: {fileID: -1934860693827361932}
   - component: {fileID: -2257928589708603627}
@@ -125,6 +125,23 @@ Transform:
   - {fileID: 6401532902016766949}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &164188671062393559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555240849038293811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cd7a82c14346fb9907d587211c7b10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _attributes:
+  - _attribute: 0
+    _value: 75
+  - _attribute: 1
+    _value: 100
 --- !u!114 &2674214978767437844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,27 +205,6 @@ MonoBehaviour:
       ConstrainVelocityToGroundPlane: 1
     MinViewAngle: -90
     MaxViewAngle: 90
---- !u!114 &8155422237044903022
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1555240849038293811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2d043ed9232489185282f8bdc5a1491, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _attributeSets:
-  - _attributeSet: {fileID: 11400000, guid: 5ea288a816aeba04cac3ab27d4f31385, type: 2}
-    _attributeValues:
-    - _attribute: {fileID: 6329282609969150329, guid: 5ea288a816aeba04cac3ab27d4f31385,
-        type: 2}
-      _value: 100
-    - _attribute: {fileID: -7571604305536842475, guid: 5ea288a816aeba04cac3ab27d4f31385,
-        type: 2}
-      _value: 100
 --- !u!136 &8494599271149049586
 CapsuleCollider:
   m_ObjectHideFlags: 0

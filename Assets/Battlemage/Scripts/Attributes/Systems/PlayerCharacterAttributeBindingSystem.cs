@@ -1,4 +1,5 @@
-﻿using Battlemage.Player;
+﻿using Battlemage.Attributes.Data;
+using Battlemage.Player;
 using Battlemage.Player.Data;
 using BovineLabs.Core.Iterators;
 using Unity.Entities;

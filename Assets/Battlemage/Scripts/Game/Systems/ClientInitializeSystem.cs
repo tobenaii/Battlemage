@@ -1,5 +1,5 @@
 ﻿using Battlemage.Camera.Data;
-using Battlemage.Character.Data;
+using Battlemage.Movement.Data;
 using Battlemage.Player.Data;
 using Battlemage.Utilities;
 using Unity.Burst;

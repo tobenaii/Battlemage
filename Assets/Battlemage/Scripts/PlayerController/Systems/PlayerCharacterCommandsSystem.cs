@@ -1,4 +1,4 @@
-using Battlemage.Character.Data;
+using Battlemage.Movement.Data;
 using Battlemage.Networking.Utilities;
 using Battlemage.PlayerController.Data;
 using Unity.Burst;
@@ -8,8 +8,8 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
-using BuildCharacterPredictedRotationSystem = Battlemage.Character.Systems.BuildCharacterPredictedRotationSystem;
-using FirstPersonCharacterVariableUpdateSystem = Battlemage.Character.Systems.FirstPersonCharacterVariableUpdateSystem;
+using BuildCharacterPredictedRotationSystem = Battlemage.Movement.Systems.BuildCharacterPredictedRotationSystem;
+using FirstPersonCharacterVariableUpdateSystem = Battlemage.Movement.Systems.FirstPersonCharacterVariableUpdateSystem;
 
 namespace Battlemage.PlayerController.Systems
 {
