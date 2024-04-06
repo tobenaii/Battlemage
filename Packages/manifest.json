@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.bovinelabs.core": "https://github.com/tertle/com.bovinelabs.core.git",
+    "com.bovinelabs.core": "https://github.com/tobenaii/com.bovinelabs.core.git",
     "com.unity.ai.navigation": "2.0.0",
     "com.unity.charactercontroller": "1.1.0-exp.10",
     "com.unity.collab-proxy": "2.3.1",

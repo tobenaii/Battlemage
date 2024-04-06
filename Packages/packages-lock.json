@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "com.bovinelabs.core": {
-      "version": "https://github.com/tertle/com.bovinelabs.core.git",
+      "version": "https://github.com/tobenaii/com.bovinelabs.core.git",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.entities": "1.2.0",
         "com.unity.logging": "1.2.0"
       },
-      "hash": "aa3a0e493ee9937f2d9d86761fb726294c14f79d"
+      "hash": "3e5d050be053d3810b863fd8fe39eae71d206f36"
     },
     "com.sirenix.odininspector": {
       "version": "file:com.sirenix.odininspector",
