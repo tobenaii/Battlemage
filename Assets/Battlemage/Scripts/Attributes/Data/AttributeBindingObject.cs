@@ -1,7 +1,7 @@
 ﻿using Unity.Properties;
 using UnityEngine;
 
-namespace Waddle.AbilitySystem.Attributes.Data
+namespace Battlemage.Attributes.Data
 {
     [CreateAssetMenu(menuName = "Waddle/AbilitySystem/AttributeBindingObject")]
     public class AttributeBindingObject : ScriptableObject

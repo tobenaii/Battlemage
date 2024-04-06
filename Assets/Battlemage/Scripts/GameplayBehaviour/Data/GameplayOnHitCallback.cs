@@ -4,7 +4,7 @@ namespace Battlemage.GameplayBehaviour.Data
 {
     public struct GameplayOnHitCallback : IComponentData
     {
-        public delegate void Delegate(ref SystemState state, ref Entity ability, ref Entity target);
+        public delegate void Delegate(ref GameplayState gameplayState, ref Entity source, ref Entity target);
 
         public long Callback;
     }

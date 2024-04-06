@@ -3,7 +3,6 @@ using Battlemage.Player;
 using Battlemage.Player.Data;
 using BovineLabs.Core.Iterators;
 using Unity.Entities;
-using Waddle.AbilitySystem.Attributes.Data;
 
 namespace Battlemage.Attributes.Systems
 {

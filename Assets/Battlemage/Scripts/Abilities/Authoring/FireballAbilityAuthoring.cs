@@ -3,7 +3,6 @@ using Battlemage.GameplayBehaviour.Authoring;
 using Battlemage.GameplayBehaviour.Data;
 using Unity.Burst;
 using Unity.Entities;
-using UnityEngine;
 
 namespace Battlemage.Abilities.Authoring
 {
@@ -14,9 +13,10 @@ namespace Battlemage.Abilities.Authoring
 
         [BurstCompile]
         [MonoPInvokeCallback(typeof(GameplayOnHitCallback.Delegate))]
-        private static void OnHit(ref SystemState state, ref Entity ability, ref Entity target)
+        private static void OnHit(ref GameplayState state, ref Entity source, ref Entity target)
         {
-            Debug.Log("Hello there.\nGeneral Kenobi");
+            state.DealDamage(10.0f, target);
+            state.MarkForDestroy(source);
         }
     }
 }

@@ -8,6 +8,7 @@ using Unity.Transforms;
 
 namespace Battlemage.GameplayBehaviour.Systems
 {
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayOnHitCallbackSystem : ISystem
     {
         private NativeList<DistanceHit> _hits;
@@ -29,7 +30,8 @@ namespace Battlemage.GameplayBehaviour.Systems
         public void OnUpdate(ref SystemState state)
         {
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
-            
+
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
             foreach (var (onHit, localTransform, entity) in
                      SystemAPI.Query<RefRO<GameplayOnHitCallback>, LocalTransform>()
                          .WithEntityAccess())
@@ -39,9 +41,12 @@ namespace Battlemage.GameplayBehaviour.Systems
                 {
                     var ability = entity;
                     var target = _hits[0].Entity;
-                    Marshal.GetDelegateForFunctionPointer<GameplayOnHitCallback.Delegate>(new IntPtr(onHit.ValueRO.Callback)).Invoke(ref state, ref ability, ref target);
+                    var gameplayState = new GameplayState(ref state, ref ecb);
+                    Marshal.GetDelegateForFunctionPointer<GameplayOnHitCallback.Delegate>(new IntPtr(onHit.ValueRO.Callback)).Invoke(ref gameplayState, ref ability, ref target);
                 }
             }
+            ecb.Playback(state.EntityManager);
+            ecb.Dispose();
         }
     }
 }
