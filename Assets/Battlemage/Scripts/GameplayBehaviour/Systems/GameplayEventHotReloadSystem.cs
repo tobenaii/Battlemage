@@ -42,7 +42,11 @@ namespace Battlemage.GameplayBehaviour.Systems
                 return;
             }
             
-            foreach (var method in monoScript.GetClass().GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+            var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(monoScript)));
+            var root = syntaxTree.GetCompilationUnitRoot();
+            var existingMethods = monoScript.GetClass()
+                .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var method in existingMethods)
             {
                 var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
                 var delegateType = attribute.GameplayEventType.GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
@@ -50,6 +54,7 @@ namespace Battlemage.GameplayBehaviour.Systems
                 var eventHash = new Hash128(
                     (uint)attribute.GameplayEventType.GetHashCode(),
                     (uint)monoScript.GetClass().GetHashCode(), 0, 0);
+                
                 ref var eventPointer = ref FindEventPointerByHash(eventHash);
                 eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
             }
@@ -79,7 +84,30 @@ namespace Battlemage.GameplayBehaviour.Systems
             var methodDeclaration = root
                 .DescendantNodes()
                 .OfType<MethodDeclarationSyntax>()
-                .First(m => m.Identifier.ValueText == methodName && m.Modifiers.Any(SyntaxKind.StaticKeyword));
+                .FirstOrDefault(m => m.Identifier.ValueText == methodName && m.Modifiers.Any(SyntaxKind.StaticKeyword));
+
+            if (methodDeclaration == null)
+            {
+                var delegateMethod = delegateType.GetMethod("Invoke");
+                var parameters = delegateMethod.GetParameters();
+
+                var parameterList = SyntaxFactory.ParameterList(
+                    SyntaxFactory.SeparatedList(
+                        parameters.Select(p =>
+                            SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Name))
+                                .WithType(SyntaxFactory.ParseTypeName(p.ParameterType.FullName!.Replace("&", "")))
+                                .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.RefKeyword)))
+                            )
+                    )
+                );
+
+                var returnType = SyntaxFactory.Token(SyntaxKind.VoidKeyword);
+
+                methodDeclaration = SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(returnType), SyntaxFactory.Identifier(methodName))
+                    .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
+                    .WithParameterList(parameterList)
+                    .WithBody(SyntaxFactory.Block());
+            }
 
             var usingStatements = root.Usings.ToArray();
 
