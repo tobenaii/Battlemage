@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
-using Battlemage.GameplayBehaviour.Data.GameplayEvents;
+using Battlemage.GameplayBehaviour.Systems;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -19,21 +20,24 @@ namespace Battlemage.GameplayBehaviour.Authoring
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var gameplayBehaviour = GetComponent<GameplayBehaviourAuthoring>();
                 DependsOn(gameplayBehaviour);
-                if (gameplayBehaviour.OnSpawnEvent != default)
+
+                foreach (var method in gameplayBehaviour.GetType()
+                             .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    AddGameplayEvent<GameplayOnSpawnEvent>(entity, gameplayBehaviour.OnSpawnEvent);
-                }
-                if (gameplayBehaviour.OnHitEvent != default)
-                {
-                    AddGameplayEvent<GameplayOnHitEvent>(entity, gameplayBehaviour.OnHitEvent);
+                    var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
+                    var delegateType = attribute.GameplayEventType
+                        .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
+                    var del = Delegate.CreateDelegate(delegateType, method);
+                    var componentType = attribute.GameplayEventType;
+                    var hash = new Hash128(
+                        (uint)componentType.GetHashCode(),
+                        (uint)gameplayBehaviour.GetType().GetHashCode(), 0, 0);
+                    var pointerRef = AddGameplayEvent(entity, del, componentType, hash);
                 }
             }
 
-            private void AddGameplayEvent<T>(Entity entity, Delegate del) where T : unmanaged, IGameplayEvent
+            private unsafe BlobAssetReference<EventPointer> AddGameplayEvent(Entity entity, Delegate del, ComponentType componentType, Hash128 hash)
             {
-                var hash = new Hash128(
-                    (uint)typeof(T).GetHashCode(),
-                    (uint)del.GetHashCode(), 0, 0);
                 if (!TryGetBlobAssetReference<EventPointer>(hash, out var result))
                 {
                     var builder = new BlobBuilder(Allocator.Temp);
@@ -42,11 +46,30 @@ namespace Battlemage.GameplayBehaviour.Authoring
                     result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
                     builder.Dispose();
                     AddBlobAssetWithCustomHash(ref result, hash);
+                    var blobMappingEntity = CreateAdditionalEntity(TransformUsageFlags.None);
+                    AddComponent(blobMappingEntity, new GameplayEventBlobMapping
+                    {
+                        Hash = hash,
+                        Pointer = result
+                    });
                 }
-                AddComponent(entity, new T()
+
+                var resultPtr = new IntPtr(result.GetUnsafePtr());
+                var handle = GCHandle.Alloc(resultPtr, GCHandleType.Pinned);
+                try
                 {
-                    EventPointerRef = result
-                });
+                    GetType().GetMethod("UnsafeAddComponent", BindingFlags.Instance | BindingFlags.NonPublic)!
+                        .Invoke(this, new object[]
+                        {
+                            entity, componentType.TypeIndex, Marshal.SizeOf<EventPointer>(),
+                            handle.AddrOfPinnedObject()
+                        });
+                }
+                finally
+                {
+                    handle.Free();
+                }
+                return result;
             }
         }
     }

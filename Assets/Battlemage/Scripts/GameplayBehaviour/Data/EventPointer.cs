@@ -1,7 +1,4 @@
 ﻿using System;
-using Unity.Collections;
-using Unity.Entities;
-using UnityEditor;
 
 namespace Battlemage.GameplayBehaviour.Data
 {

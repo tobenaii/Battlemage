@@ -5,13 +5,13 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Authoring;
 using Battlemage.GameplayBehaviour.Data;
-using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Unity.Entities;
 using UnityEditor;
 using UnityEngine;
+using Hash128 = Unity.Entities.Hash128;
 
 namespace Battlemage.GameplayBehaviour.Systems
 {
@@ -27,7 +27,6 @@ namespace Battlemage.GameplayBehaviour.Systems
             _watcher.NotifyFilter = NotifyFilters.LastWrite;
             _watcher.Changed += (e, args) => EditorApplication.delayCall += () => Reload(args.FullPath.Replace('\\', '/').Replace(Application.dataPath, "Assets"));
             _watcher.EnableRaisingEvents = true;
-            Debug.Log("Listening for gameplay event changes...");
         }
 
         protected override void OnStopRunning()
@@ -43,25 +42,42 @@ namespace Battlemage.GameplayBehaviour.Systems
                 return;
             }
             
-            //TODO: Find these using reflection
-            UpdateEventPointer<GameplayOnSpawnEvent>(monoScript, typeof(GameplayOnSpawnEvent.Delegate), "OnSpawn");
-            UpdateEventPointer<GameplayOnHitEvent>(monoScript, typeof(GameplayOnHitEvent.Delegate), "OnHit");
+            foreach (var method in monoScript.GetClass().GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
+                var delegateType = attribute.GameplayEventType
+                    .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
+                UpdateEventPointer(monoScript, delegateType, attribute.GameplayEventType, method.Name);
+            }
+            Debug.Log($"Reloaded gameplay events: {monoScript.name}");
         }
         
-        private void UpdateEventPointer<T>(MonoScript script, Type delegateType, string methodName) where T : unmanaged, IGameplayEvent
+        private void UpdateEventPointer(MonoScript script, Type delegateType, Type eventType, string methodName)
         {
             var callback = CompileDelegate(script, delegateType, methodName);
-            var callbackValue = SystemAPI.GetSingleton<T>();
-            callbackValue.EventPointerRef.Value = new EventPointer()
+            BlobAssetReference<EventPointer> eventPointerBlob = default;
+            var hash = new Hash128(
+                (uint)eventType.GetHashCode(),
+                (uint)script.GetClass().GetHashCode(), 0, 0);
+            foreach (var blobMapping in SystemAPI.Query<GameplayEventBlobMapping>())
             {
-                Pointer = Marshal.GetFunctionPointerForDelegate(callback)
-            };
-            Debug.Log($"Reloaded gameplay events: {script.name}");
+                if (blobMapping.Hash == hash)
+                {
+                    eventPointerBlob = blobMapping.Pointer;
+                    break;
+                }
+            }
+
+            if (eventPointerBlob == default)
+            {
+                Debug.LogError($"Failed to find event pointer mapping for {script.name}: {methodName}");
+                return;
+            }
+            eventPointerBlob.Value.Pointer = Marshal.GetFunctionPointerForDelegate(callback);
         }
         
         private static Delegate CompileDelegate(MonoScript script, Type delegateType, string methodName)
         {
-            
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(script)));
             var root = syntaxTree.GetCompilationUnitRoot();
 
@@ -70,7 +86,6 @@ namespace Battlemage.GameplayBehaviour.Systems
                 .OfType<MethodDeclarationSyntax>()
                 .First(m => m.Identifier.ValueText == methodName && m.Modifiers.Any(SyntaxKind.StaticKeyword));
 
-            // Create using statements
             var usingStatements = root.Usings.ToArray();
 
             MemberDeclarationSyntax memberDeclaration = SyntaxFactory.ClassDeclaration("Wrapper")
