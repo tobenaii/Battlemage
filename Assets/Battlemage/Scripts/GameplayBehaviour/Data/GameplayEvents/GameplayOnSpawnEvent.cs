@@ -2,10 +2,9 @@
 
 namespace Battlemage.GameplayBehaviour.Data.GameplayEvents
 {
-    [GameplayEventDefinition(typeof(Delegate))]
+    [GameplayEventDefinition]
     public struct GameplayOnSpawnEvent : IGameplayEvent
     {
-        public delegate void Delegate(ref GameplayState gameplayState, ref Entity self);
         public BlobAssetReference<EventPointer> EventPointerRef { get; set; }
     }
 }

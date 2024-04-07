@@ -1,10 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Authoring;
 using Battlemage.GameplayBehaviour.Data;
+using Battlemage.GameplayBehaviour.Data.GameplayEvents;
+using Battlemage.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -45,16 +48,14 @@ namespace Battlemage.GameplayBehaviour.Systems
             foreach (var method in monoScript.GetClass().GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
-                var delegateType = attribute.GameplayEventType
-                    .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
-                UpdateEventPointer(monoScript, delegateType, attribute.GameplayEventType, method.Name);
+                UpdateEventPointer(monoScript, attribute.GameplayEventType, method.Name);
             }
             Debug.Log($"Reloaded gameplay events: {monoScript.name}");
         }
         
-        private void UpdateEventPointer(MonoScript script, Type delegateType, Type eventType, string methodName)
+        private void UpdateEventPointer(MonoScript script, Type eventType, string methodName)
         {
-            var callback = CompileDelegate(script, delegateType, methodName);
+            var callback = CompileDelegate(script, methodName);
             BlobAssetReference<EventPointer> eventPointerBlob = default;
             var hash = new Hash128(
                 (uint)eventType.GetHashCode(),
@@ -63,7 +64,7 @@ namespace Battlemage.GameplayBehaviour.Systems
             {
                 if (blobMapping.Hash == hash)
                 {
-                    eventPointerBlob = blobMapping.Pointer;
+                    eventPointerBlob = blobMapping.PointerBlobRef;
                     break;
                 }
             }
@@ -76,7 +77,7 @@ namespace Battlemage.GameplayBehaviour.Systems
             eventPointerBlob.Value.Pointer = Marshal.GetFunctionPointerForDelegate(callback);
         }
         
-        private static Delegate CompileDelegate(MonoScript script, Type delegateType, string methodName)
+        private static Delegate CompileDelegate(MonoScript script, string methodName)
         {
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(script)));
             var root = syntaxTree.GetCompilationUnitRoot();
@@ -114,7 +115,7 @@ namespace Battlemage.GameplayBehaviour.Systems
                 var type = assembly.GetType("Wrapper");
                 var methodInfo = type.GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
                 if (methodInfo != null)
-                    return Delegate.CreateDelegate(delegateType, methodInfo);
+                    return Delegate.CreateDelegate(MiscUtilities.GetDelegateType(methodInfo), methodInfo);
             }
 
             throw new InvalidOperationException("Compilation failed: " +

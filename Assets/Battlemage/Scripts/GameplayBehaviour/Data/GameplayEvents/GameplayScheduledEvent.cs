@@ -1,10 +1,9 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 
 namespace Battlemage.GameplayBehaviour.Data.GameplayEvents
 {
     [GameplayEventDefinition]
-    public struct GameplayOnHitEvent : IGameplayEvent
+    public struct GameplayScheduledEvent : IGameplayEvent
     {
         public BlobAssetReference<EventPointer> EventPointerRef { get; set; }
     }

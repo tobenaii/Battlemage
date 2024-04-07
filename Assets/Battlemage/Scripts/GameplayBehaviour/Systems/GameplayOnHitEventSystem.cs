@@ -1,6 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using Battlemage.GameplayBehaviour.Data;
+﻿using Battlemage.GameplayBehaviour.Data;
 using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using Unity.Collections;
 using Unity.Entities;
@@ -28,7 +26,7 @@ namespace Battlemage.GameplayBehaviour.Systems
             }
         }
 
-        public void OnUpdate(ref SystemState state)
+        public unsafe void OnUpdate(ref SystemState state)
         {
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
 
@@ -40,10 +38,10 @@ namespace Battlemage.GameplayBehaviour.Systems
                 _hits.Clear();
                 if (collisionWorld.OverlapSphere(localTransform.Position, 1, ref _hits, CollisionFilter.Default))
                 {
-                    var ability = entity;
+                    var self = entity;
                     var target = _hits[0].Entity;
                     var gameplayState = new GameplayState(ref state, ref ecb);
-                    Marshal.GetDelegateForFunctionPointer<GameplayOnHitEvent.Delegate>(onHit.ValueRO.EventPointerRef.Value.Pointer).Invoke(ref gameplayState, ref ability, ref target);
+                    onHit.ValueRO.EventPointerRef.Value.Invoke(ref gameplayState, ref self, ref target);
                 }
             }
             ecb.Playback(state.EntityManager);

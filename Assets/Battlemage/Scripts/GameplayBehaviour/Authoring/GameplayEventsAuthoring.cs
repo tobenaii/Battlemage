@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
 using Battlemage.GameplayBehaviour.Systems;
+using Battlemage.Utilities;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -25,8 +26,7 @@ namespace Battlemage.GameplayBehaviour.Authoring
                              .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
-                    var delegateType = attribute.GameplayEventType
-                        .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
+                    var delegateType = MiscUtilities.GetDelegateType(method);
                     var del = Delegate.CreateDelegate(delegateType, method);
                     var componentType = attribute.GameplayEventType;
                     var hash = new Hash128(
@@ -46,11 +46,12 @@ namespace Battlemage.GameplayBehaviour.Authoring
                     result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
                     builder.Dispose();
                     AddBlobAssetWithCustomHash(ref result, hash);
+                    
                     var blobMappingEntity = CreateAdditionalEntity(TransformUsageFlags.None);
                     AddComponent(blobMappingEntity, new GameplayEventBlobMapping
                     {
                         Hash = hash,
-                        Pointer = result
+                        PointerBlobRef = result
                     });
                 }
 
