@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
+using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
@@ -9,7 +10,7 @@ using Unity.Transforms;
 namespace Battlemage.GameplayBehaviour.Systems
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-    public partial struct GameplayOnHitCallbackSystem : ISystem
+    public partial struct GameplayOnHitEventSystem : ISystem
     {
         private NativeList<DistanceHit> _hits;
         

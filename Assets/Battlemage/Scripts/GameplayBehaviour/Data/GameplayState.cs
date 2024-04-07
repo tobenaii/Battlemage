@@ -1,6 +1,8 @@
 ﻿using Battlemage.Attributes.Data;
 using BovineLabs.Core.Iterators;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Physics;
 
 namespace Battlemage.GameplayBehaviour.Data
 {
@@ -18,6 +20,14 @@ namespace Battlemage.GameplayBehaviour.Data
         public void MarkForDestroy(Entity entity)
         {
             _ecb.DestroyEntity(entity);
+        }
+
+        public void SetVelocity(Entity entity, float3 velocity)
+        { 
+            _state.EntityManager.SetComponentData(entity, new PhysicsVelocity()
+            {
+                Linear = velocity,
+            });
         }
         
         public void DealDamage(float amount, Entity target)

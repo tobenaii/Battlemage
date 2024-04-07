@@ -4,6 +4,6 @@ namespace Battlemage.GameplayBehaviour.Data
 {
     public interface IGameplayEvent : IComponentData
     {
-        public BlobAssetReference<EventPointer> EventPointerRef { get; }
+        public BlobAssetReference<EventPointer> EventPointerRef { get; set; }
     }
 }

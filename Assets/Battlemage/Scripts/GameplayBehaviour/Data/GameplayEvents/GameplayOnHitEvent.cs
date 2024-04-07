@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace Battlemage.GameplayBehaviour.Data
+namespace Battlemage.GameplayBehaviour.Data.GameplayEvents
 {
     public struct GameplayOnHitEvent : IGameplayEvent
     {

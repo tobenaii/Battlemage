@@ -1,5 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
+using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -17,22 +19,34 @@ namespace Battlemage.GameplayBehaviour.Authoring
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var gameplayBehaviour = GetComponent<GameplayBehaviourAuthoring>();
                 DependsOn(gameplayBehaviour);
-                if (gameplayBehaviour.OnHitCallback != default)
+                if (gameplayBehaviour.OnSpawnEvent != default)
                 {
-                    if (!TryGetBlobAssetReference<EventPointer>(new Hash128("OnHit"), out var result))
-                    {
-                        var builder = new BlobBuilder(Allocator.Temp);
-                        ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
-                        eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(gameplayBehaviour.OnHitCallback);
-                        result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
-                        builder.Dispose();
-                        AddBlobAssetWithCustomHash(ref result, new Hash128("OnHit"));
-                    }
-                    AddComponent(entity, new GameplayOnHitEvent()
-                    {
-                        EventPointerRef = result
-                    });
+                    AddGameplayEvent<GameplayOnSpawnEvent>(entity, gameplayBehaviour.OnSpawnEvent);
                 }
+                if (gameplayBehaviour.OnHitEvent != default)
+                {
+                    AddGameplayEvent<GameplayOnHitEvent>(entity, gameplayBehaviour.OnHitEvent);
+                }
+            }
+
+            private void AddGameplayEvent<T>(Entity entity, Delegate del) where T : unmanaged, IGameplayEvent
+            {
+                var hash = new Hash128(
+                    (uint)typeof(T).GetHashCode(),
+                    (uint)del.GetHashCode(), 0, 0);
+                if (!TryGetBlobAssetReference<EventPointer>(hash, out var result))
+                {
+                    var builder = new BlobBuilder(Allocator.Temp);
+                    ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
+                    eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(del);
+                    result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
+                    builder.Dispose();
+                    AddBlobAssetWithCustomHash(ref result, hash);
+                }
+                AddComponent(entity, new T()
+                {
+                    EventPointerRef = result
+                });
             }
         }
     }

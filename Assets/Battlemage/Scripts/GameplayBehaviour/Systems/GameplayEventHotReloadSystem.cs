@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Authoring;
 using Battlemage.GameplayBehaviour.Data;
+using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,7 +27,7 @@ namespace Battlemage.GameplayBehaviour.Systems
             _watcher.NotifyFilter = NotifyFilters.LastWrite;
             _watcher.Changed += (e, args) => EditorApplication.delayCall += () => Reload(args.FullPath.Replace('\\', '/').Replace(Application.dataPath, "Assets"));
             _watcher.EnableRaisingEvents = true;
-            Debug.Log("Listening for file changes...");
+            Debug.Log("Listening for gameplay event changes...");
         }
 
         protected override void OnStopRunning()
@@ -43,21 +44,22 @@ namespace Battlemage.GameplayBehaviour.Systems
             }
             
             //TODO: Find these using reflection
-            UpdateEventPointer<GameplayOnHitEvent>(monoScript, "OnHit");
-            Debug.Log("Reloaded Gameplay Events");
+            UpdateEventPointer<GameplayOnSpawnEvent>(monoScript, typeof(GameplayOnSpawnEvent.Delegate), "OnSpawn");
+            UpdateEventPointer<GameplayOnHitEvent>(monoScript, typeof(GameplayOnHitEvent.Delegate), "OnHit");
         }
         
-        private void UpdateEventPointer<T>(MonoScript script, string methodName) where T : unmanaged, IGameplayEvent
+        private void UpdateEventPointer<T>(MonoScript script, Type delegateType, string methodName) where T : unmanaged, IGameplayEvent
         {
-            var callback = CompileDelegate(script, methodName);
+            var callback = CompileDelegate(script, delegateType, methodName);
             var callbackValue = SystemAPI.GetSingleton<T>();
             callbackValue.EventPointerRef.Value = new EventPointer()
             {
                 Pointer = Marshal.GetFunctionPointerForDelegate(callback)
             };
+            Debug.Log($"Reloaded gameplay events: {script.name}");
         }
         
-        private static Delegate CompileDelegate(MonoScript script, string methodName)
+        private static Delegate CompileDelegate(MonoScript script, Type delegateType, string methodName)
         {
             
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(script)));
@@ -97,7 +99,7 @@ namespace Battlemage.GameplayBehaviour.Systems
                 var type = assembly.GetType("Wrapper");
                 var methodInfo = type.GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
                 if (methodInfo != null)
-                    return Delegate.CreateDelegate(typeof(GameplayOnHitEvent.Delegate), methodInfo);
+                    return Delegate.CreateDelegate(delegateType, methodInfo);
             }
 
             throw new InvalidOperationException("Compilation failed: " +
