@@ -2,8 +2,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
-using Battlemage.GameplayBehaviour.Systems;
-using Battlemage.Utilities;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -26,23 +24,24 @@ namespace Battlemage.GameplayBehaviour.Authoring
                              .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
-                    var delegateType = MiscUtilities.GetDelegateType(method);
-                    var del = Delegate.CreateDelegate(delegateType, method);
+                    var delegateType = attribute.GameplayEventType
+                        .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
+                    var eventDelegate = Delegate.CreateDelegate(delegateType, method);
                     var componentType = attribute.GameplayEventType;
                     var hash = new Hash128(
                         (uint)componentType.GetHashCode(),
                         (uint)gameplayBehaviour.GetType().GetHashCode(), 0, 0);
-                    var pointerRef = AddGameplayEvent(entity, del, componentType, hash);
+                    AddGameplayEvent(entity, eventDelegate, componentType, hash);
                 }
             }
 
-            private unsafe BlobAssetReference<EventPointer> AddGameplayEvent(Entity entity, Delegate del, ComponentType componentType, Hash128 hash)
+            private unsafe void AddGameplayEvent(Entity entity, Delegate eventDelegate, ComponentType componentType, Hash128 hash)
             {
                 if (!TryGetBlobAssetReference<EventPointer>(hash, out var result))
                 {
                     var builder = new BlobBuilder(Allocator.Temp);
                     ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
-                    eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(del);
+                    eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
                     result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
                     builder.Dispose();
                     AddBlobAssetWithCustomHash(ref result, hash);
@@ -51,7 +50,7 @@ namespace Battlemage.GameplayBehaviour.Authoring
                     AddComponent(blobMappingEntity, new GameplayEventBlobMapping
                     {
                         Hash = hash,
-                        PointerBlobRef = result
+                        Pointer = result
                     });
                 }
 
@@ -70,7 +69,6 @@ namespace Battlemage.GameplayBehaviour.Authoring
                 {
                     handle.Free();
                 }
-                return result;
             }
         }
     }

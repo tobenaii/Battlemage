@@ -1,13 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Authoring;
 using Battlemage.GameplayBehaviour.Data;
-using Battlemage.GameplayBehaviour.Data.GameplayEvents;
-using Battlemage.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -48,36 +45,33 @@ namespace Battlemage.GameplayBehaviour.Systems
             foreach (var method in monoScript.GetClass().GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
-                UpdateEventPointer(monoScript, attribute.GameplayEventType, method.Name);
+                var delegateType = attribute.GameplayEventType.GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
+                var eventDelegate = CompileDelegate(monoScript, delegateType, method.Name);
+                var eventHash = new Hash128(
+                    (uint)attribute.GameplayEventType.GetHashCode(),
+                    (uint)monoScript.GetClass().GetHashCode(), 0, 0);
+                ref var eventPointer = ref FindEventPointerByHash(eventHash);
+                eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
             }
             Debug.Log($"Reloaded gameplay events: {monoScript.name}");
         }
-        
-        private void UpdateEventPointer(MonoScript script, Type eventType, string methodName)
+
+        private ref EventPointer FindEventPointerByHash(Hash128 hash)
         {
-            var callback = CompileDelegate(script, methodName);
-            BlobAssetReference<EventPointer> eventPointerBlob = default;
-            var hash = new Hash128(
-                (uint)eventType.GetHashCode(),
-                (uint)script.GetClass().GetHashCode(), 0, 0);
+            BlobAssetReference<EventPointer> eventPointerReference = default;
             foreach (var blobMapping in SystemAPI.Query<GameplayEventBlobMapping>())
             {
                 if (blobMapping.Hash == hash)
                 {
-                    eventPointerBlob = blobMapping.PointerBlobRef;
+                    eventPointerReference = blobMapping.Pointer;
                     break;
                 }
             }
 
-            if (eventPointerBlob == default)
-            {
-                Debug.LogError($"Failed to find event pointer mapping for {script.name}: {methodName}");
-                return;
-            }
-            eventPointerBlob.Value.Pointer = Marshal.GetFunctionPointerForDelegate(callback);
+            return ref eventPointerReference.Value;
         }
         
-        private static Delegate CompileDelegate(MonoScript script, string methodName)
+        private static Delegate CompileDelegate(MonoScript script, Type delegateType, string methodName)
         {
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(script)));
             var root = syntaxTree.GetCompilationUnitRoot();
@@ -115,7 +109,7 @@ namespace Battlemage.GameplayBehaviour.Systems
                 var type = assembly.GetType("Wrapper");
                 var methodInfo = type.GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
                 if (methodInfo != null)
-                    return Delegate.CreateDelegate(MiscUtilities.GetDelegateType(methodInfo), methodInfo);
+                    return Delegate.CreateDelegate(delegateType, methodInfo);
             }
 
             throw new InvalidOperationException("Compilation failed: " +

@@ -1,4 +1,5 @@
 ﻿using Battlemage.Attributes.Data;
+using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using BovineLabs.Core.Iterators;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -36,6 +37,10 @@ namespace Battlemage.GameplayBehaviour.Data
             var health = attributeMap[(byte)GameplayAttribute.Health];
             health.CurrentValue -= amount;
             attributeMap[(byte)GameplayAttribute.Health] = health;
+        }
+
+        public void ScheduleEvent(Entity entity, float time, GameplayScheduledEvent.Delegate scheduledEvent)
+        {
         }
     }
 }

@@ -14,12 +14,19 @@ namespace Battlemage.Abilities.Authoring
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
             state.SetVelocity(self, new float3(1, 0, 0));
+            state.ScheduleEvent(self, 10.0f, DestroyEvent);
         }
         
         [GameplayEvent(typeof(GameplayOnHitEvent))]
         private static void OnHit(ref GameplayState state, ref Entity self, ref Entity target)
         {
             state.DealDamage(0.1f, target);
+            state.MarkForDestroy(self);
+        }
+                
+        [GameplayEvent(typeof(GameplayScheduledEvent))]
+        private static void DestroyEvent(ref GameplayState state, ref Entity self)
+        {
             state.MarkForDestroy(self);
         }
     }

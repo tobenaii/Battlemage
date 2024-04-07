@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.Graphics;
@@ -62,13 +58,6 @@ namespace Battlemage.Utilities
         public static Entity GetSingletonEntity<T>(ref SystemState state) where T : unmanaged, IComponentData
         {
             return new EntityQueryBuilder(Allocator.Temp).WithAll<T>().Build(ref state).GetSingletonEntity();
-        }
-        
-        public static Type GetDelegateType(MethodInfo methodInfo)
-        {
-            Type[] parameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray();
-            Type returnType = methodInfo.ReturnType;
-            return Expression.GetDelegateType(parameterTypes.Concat(new[] { returnType }).ToArray());
         }
     }
 }

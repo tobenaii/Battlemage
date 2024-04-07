@@ -6,6 +6,11 @@ namespace Battlemage.GameplayBehaviour.Data
     [AttributeUsage(AttributeTargets.Struct)]
     public class GameplayEventDefinitionAttribute : Attribute
     {
+        public Type DelegateType { get; }
+        public GameplayEventDefinitionAttribute(Type delegateType)
+        {
+            DelegateType = delegateType;
+        }
     }
     
     [AttributeUsage(AttributeTargets.Method)]

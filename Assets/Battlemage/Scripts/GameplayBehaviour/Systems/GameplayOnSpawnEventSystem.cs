@@ -16,7 +16,7 @@ namespace Battlemage.GameplayBehaviour.Systems
             {
                 var gameplayState = new GameplayState(ref state, ref ecb);
                 var source = entity;
-                onSpawnEvent.ValueRO.EventPointerRef.Value.Invoke(ref gameplayState, ref source);
+                Marshal.GetDelegateForFunctionPointer<GameplayOnSpawnEvent.Delegate>(onSpawnEvent.ValueRO.EventPointerRef.Value.Pointer).Invoke(ref gameplayState, ref source);
                 ecb.RemoveComponent<GameplayOnSpawnEvent>(entity);
             }
             ecb.Playback(state.EntityManager);
