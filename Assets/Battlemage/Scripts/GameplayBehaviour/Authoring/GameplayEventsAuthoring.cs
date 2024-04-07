@@ -1,7 +1,9 @@
-﻿using Battlemage.GameplayBehaviour.Data;
-using Unity.Burst;
+﻿using System.Runtime.InteropServices;
+using Battlemage.GameplayBehaviour.Data;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using Hash128 = Unity.Entities.Hash128;
 
 namespace Battlemage.GameplayBehaviour.Authoring
 {
@@ -14,12 +16,21 @@ namespace Battlemage.GameplayBehaviour.Authoring
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var gameplayBehaviour = GetComponent<GameplayBehaviourAuthoring>();
-                
+                DependsOn(gameplayBehaviour);
                 if (gameplayBehaviour.OnHitCallback != default)
                 {
-                    AddComponent(entity, new GameplayOnHitCallback()
+                    if (!TryGetBlobAssetReference<EventPointer>(new Hash128("OnHit"), out var result))
                     {
-                        Callback = BurstCompiler.CompileFunctionPointer(gameplayBehaviour.OnHitCallback).Value.ToInt64()
+                        var builder = new BlobBuilder(Allocator.Temp);
+                        ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
+                        eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(gameplayBehaviour.OnHitCallback);
+                        result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
+                        builder.Dispose();
+                        AddBlobAssetWithCustomHash(ref result, new Hash128("OnHit"));
+                    }
+                    AddComponent(entity, new GameplayOnHitEvent()
+                    {
+                        EventPointerRef = result
                     });
                 }
             }

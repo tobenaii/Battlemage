@@ -33,7 +33,7 @@ namespace Battlemage.GameplayBehaviour.Systems
 
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             foreach (var (onHit, localTransform, entity) in
-                     SystemAPI.Query<RefRO<GameplayOnHitCallback>, LocalTransform>()
+                     SystemAPI.Query<RefRO<GameplayOnHitEvent>, LocalTransform>()
                          .WithEntityAccess())
             {
                 _hits.Clear();
@@ -42,7 +42,7 @@ namespace Battlemage.GameplayBehaviour.Systems
                     var ability = entity;
                     var target = _hits[0].Entity;
                     var gameplayState = new GameplayState(ref state, ref ecb);
-                    Marshal.GetDelegateForFunctionPointer<GameplayOnHitCallback.Delegate>(new IntPtr(onHit.ValueRO.Callback)).Invoke(ref gameplayState, ref ability, ref target);
+                    Marshal.GetDelegateForFunctionPointer<GameplayOnHitEvent.Delegate>(onHit.ValueRO.EventPointerRef.Value.Pointer).Invoke(ref gameplayState, ref ability, ref target);
                 }
             }
             ecb.Playback(state.EntityManager);

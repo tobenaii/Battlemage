@@ -2,10 +2,9 @@
 
 namespace Battlemage.GameplayBehaviour.Data
 {
-    public struct GameplayOnHitCallback : IComponentData
+    public struct GameplayOnHitEvent : IGameplayEvent
     {
         public delegate void Delegate(ref GameplayState gameplayState, ref Entity source, ref Entity target);
-
-        public long Callback;
+        public BlobAssetReference<EventPointer> EventPointerRef { get; set; }
     }
 }

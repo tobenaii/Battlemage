@@ -3,10 +3,9 @@ using UnityEngine;
 
 namespace Battlemage.GameplayBehaviour.Authoring
 {
-    [DisallowMultipleComponent, RequireComponent(typeof(GameplayEventsAuthoring))]
+    [DisallowMultipleComponent, RequireComponent(typeof(GameplayEventsAuthoring)), ExecuteAlways]
     public abstract class GameplayBehaviourAuthoring : MonoBehaviour
     {
-        public virtual GameplayOnHitCallback.Delegate OnHitCallback => default;
-
+        public virtual GameplayOnHitEvent.Delegate OnHitCallback => default;
     }
 }
