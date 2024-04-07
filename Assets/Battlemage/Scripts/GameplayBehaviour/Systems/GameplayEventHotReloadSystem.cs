@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Authoring;
 using Battlemage.GameplayBehaviour.Data;
+using BovineLabs.Core.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEditor;
 using UnityEngine;
@@ -19,6 +22,7 @@ namespace Battlemage.GameplayBehaviour.Systems
     public partial class GameplayEventHotReloadSystem : SystemBase
     {
         private FileSystemWatcher _watcher;
+        private Dictionary<Hash128, List<MethodInfo>> _methodInfos = new();
         
         protected override void OnStartRunning()
         {
@@ -42,26 +46,98 @@ namespace Battlemage.GameplayBehaviour.Systems
                 return;
             }
             
-            var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(monoScript)));
-            var root = syntaxTree.GetCompilationUnitRoot();
-            var existingMethods = monoScript.GetClass()
-                .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var method in existingMethods)
+            var monoHash = new Hash128((uint)monoScript.GetClass().GetHashCode(), 0, 0, 0);
+            if (!_methodInfos.TryGetValue(monoHash, out var prevMethodInfos))
             {
-                var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
+                prevMethodInfos = monoScript.GetClass().GetMethods(BindingFlags.Static | BindingFlags.NonPublic).ToList();
+            }
+            var methodInfos = CompileEvents(monoScript).ToList();
+            var availableEvents = new List<(ComponentType type, Hash128 hash, Delegate eventDelegate)>();
+            foreach (var methodInfo in methodInfos)
+            {
+                var attribute = methodInfo.GetCustomAttribute<GameplayEventAttribute>();
                 var delegateType = attribute.GameplayEventType.GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
-                var eventDelegate = CompileDelegate(monoScript, delegateType, method.Name);
                 var eventHash = new Hash128(
                     (uint)attribute.GameplayEventType.GetHashCode(),
                     (uint)monoScript.GetClass().GetHashCode(), 0, 0);
-                
-                ref var eventPointer = ref FindEventPointerByHash(eventHash);
-                eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
+                var eventPointerBlob = FindEventPointerByHash(eventHash);
+                var eventDelegate = Delegate.CreateDelegate(delegateType, methodInfo);
+                availableEvents.Add((attribute.GameplayEventType, eventHash, eventDelegate));
+                if (!eventPointerBlob.IsCreated)
+                {
+                    continue;
+                }
+                eventPointerBlob.Value.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
             }
+
+            var removedEventTypes = prevMethodInfos
+                .Where(method =>
+                    !availableEvents.Select(x => x.type).Contains(method.GetCustomAttribute<GameplayEventAttribute>()
+                        .GameplayEventType))
+                .Select(method => method.GetCustomAttribute<GameplayEventAttribute>().GameplayEventType).ToList();
+            
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            foreach (var (behaviourHash, entity) in SystemAPI.Query<GameplayBehaviourHash>().WithEntityAccess())
+            {
+                if (behaviourHash.Value != monoHash)
+                {
+                    continue;
+                }
+
+                foreach (var eventType in removedEventTypes)
+                {
+                    if (EntityManager.HasComponent(entity, eventType))
+                    {
+                        ecb.RemoveComponent(entity, eventType);
+                    }
+                }
+
+                foreach (var gEvent in availableEvents)
+                {
+                    if (!EntityManager.HasComponent(entity, gEvent.type))
+                    {
+                        AddGameplayEvent(entity, gEvent.eventDelegate, gEvent.type, gEvent.hash, ecb);
+                    }
+                }
+            }
+            ecb.Playback(EntityManager);
+            ecb.Dispose();
+            _methodInfos[monoHash] = methodInfos;
             Debug.Log($"Reloaded gameplay events: {monoScript.name}");
         }
+        
+        private unsafe void AddGameplayEvent(Entity entity, Delegate eventDelegate, ComponentType componentType, Hash128 hash, EntityCommandBuffer ecb)
+        {
+            var eventPointerReference = FindEventPointerByHash(hash);
+            if (!eventPointerReference.IsCreated)
+            {
+                var builder = new BlobBuilder(Allocator.Temp);
+                ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
+                eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
+                eventPointerReference = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
+                builder.Dispose();
+                    
+                var blobMappingEntity = ecb.CreateEntity();
+                ecb.AddComponent(blobMappingEntity, new GameplayEventBlobMapping
+                {
+                    Hash = hash,
+                    Pointer = eventPointerReference
+                });
+            }
 
-        private ref EventPointer FindEventPointerByHash(Hash128 hash)
+            var resultPtr = new IntPtr(eventPointerReference.GetUnsafePtr());
+            var handle = GCHandle.Alloc(resultPtr, GCHandleType.Pinned);
+            try
+            {
+                ecb.UnsafeAddComponent(entity, componentType.TypeIndex, Marshal.SizeOf<EventPointer>(), handle.AddrOfPinnedObject().ToPointer());
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private BlobAssetReference<EventPointer> FindEventPointerByHash(Hash128 hash)
         {
             BlobAssetReference<EventPointer> eventPointerReference = default;
             foreach (var blobMapping in SystemAPI.Query<GameplayEventBlobMapping>())
@@ -73,47 +149,24 @@ namespace Battlemage.GameplayBehaviour.Systems
                 }
             }
 
-            return ref eventPointerReference.Value;
+            return eventPointerReference;
         }
         
-        private static Delegate CompileDelegate(MonoScript script, Type delegateType, string methodName)
+        private static IEnumerable<MethodInfo> CompileEvents(MonoScript script)
         {
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(script)));
             var root = syntaxTree.GetCompilationUnitRoot();
 
-            var methodDeclaration = root
+            var usingStatements = root.Usings.ToArray();
+            
+            var methodDeclarations = root
                 .DescendantNodes()
                 .OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.ValueText == methodName && m.Modifiers.Any(SyntaxKind.StaticKeyword));
-
-            if (methodDeclaration == null)
-            {
-                var delegateMethod = delegateType.GetMethod("Invoke");
-                var parameters = delegateMethod.GetParameters();
-
-                var parameterList = SyntaxFactory.ParameterList(
-                    SyntaxFactory.SeparatedList(
-                        parameters.Select(p =>
-                            SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Name))
-                                .WithType(SyntaxFactory.ParseTypeName(p.ParameterType.FullName!.Replace("&", "")))
-                                .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.RefKeyword)))
-                            )
-                    )
-                );
-
-                var returnType = SyntaxFactory.Token(SyntaxKind.VoidKeyword);
-
-                methodDeclaration = SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(returnType), SyntaxFactory.Identifier(methodName))
-                    .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
-                    .WithParameterList(parameterList)
-                    .WithBody(SyntaxFactory.Block());
-            }
-
-            var usingStatements = root.Usings.ToArray();
+                .Where(m => m.Modifiers.Any(SyntaxKind.StaticKeyword));
 
             MemberDeclarationSyntax memberDeclaration = SyntaxFactory.ClassDeclaration("Wrapper")
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword))
-                .AddMembers(methodDeclaration);
+                .AddMembers(methodDeclarations.ToArray());
 
             var compilationUnit = SyntaxFactory.CompilationUnit()
                 .AddUsings(usingStatements)
@@ -135,9 +188,8 @@ namespace Battlemage.GameplayBehaviour.Systems
                 ms.Seek(0, SeekOrigin.Begin);
                 var assembly = Assembly.Load(ms.ToArray());
                 var type = assembly.GetType("Wrapper");
-                var methodInfo = type.GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
-                if (methodInfo != null)
-                    return Delegate.CreateDelegate(delegateType, methodInfo);
+                var methodInfos = type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic);
+                return methodInfos;
             }
 
             throw new InvalidOperationException("Compilation failed: " +

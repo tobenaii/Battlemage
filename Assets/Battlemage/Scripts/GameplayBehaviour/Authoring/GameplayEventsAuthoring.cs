@@ -19,7 +19,11 @@ namespace Battlemage.GameplayBehaviour.Authoring
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var gameplayBehaviour = GetComponent<GameplayBehaviourAuthoring>();
                 DependsOn(gameplayBehaviour);
-
+                AddComponent(entity, new GameplayBehaviourHash()
+                {
+                    Value = new Hash128(
+                        (uint)gameplayBehaviour.GetType().GetHashCode(), 0, 0, 0)
+                });
                 foreach (var method in gameplayBehaviour.GetType()
                              .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
