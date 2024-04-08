@@ -1,10 +1,11 @@
 ﻿using System;
-using Battlemage.GameplayBehaviour.Data.GameplayEvents;
+using Unity.Burst;
+using Unity.Entities;
 
 namespace Battlemage.GameplayBehaviour.Data
 {
     [AttributeUsage(AttributeTargets.Struct)]
-    public class GameplayEventDefinitionAttribute : Attribute
+    public class GameplayEventDefinitionAttribute : BurstCompileAttribute
     {
         public Type DelegateType { get; }
         public GameplayEventDefinitionAttribute(Type delegateType)
@@ -16,7 +17,7 @@ namespace Battlemage.GameplayBehaviour.Data
     [AttributeUsage(AttributeTargets.Method)]
     public class GameplayEventAttribute : Attribute
     {
-        public Type GameplayEventType { get; }
+        public ComponentType GameplayEventType { get; }
         
         public GameplayEventAttribute(Type gameplayEventType)
         {

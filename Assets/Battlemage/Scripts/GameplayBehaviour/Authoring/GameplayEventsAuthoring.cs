@@ -2,6 +2,8 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
+using Battlemage.GameplayBehaviour.Data.GameplayEvents;
+using Battlemage.GameplayBehaviour.Utilities;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -28,50 +30,50 @@ namespace Battlemage.GameplayBehaviour.Authoring
                              .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
-                    var delegateType = attribute.GameplayEventType
+                    var delegateType = attribute.GameplayEventType.GetManagedType()
                         .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
                     var eventDelegate = Delegate.CreateDelegate(delegateType, method);
                     var componentType = attribute.GameplayEventType;
-                    var hash = new Hash128(
-                        (uint)componentType.GetHashCode(),
-                        (uint)gameplayBehaviour.GetType().GetHashCode(), 0, 0);
+                    var hash = GameplayBehaviourUtilities.GetEventHash(componentType, gameplayBehaviour.GetType(),
+                        method);
+                    
                     AddGameplayEvent(entity, eventDelegate, componentType, hash);
                 }
+                AddBuffer<GameplayScheduledEvent>(entity);
             }
 
-            private unsafe void AddGameplayEvent(Entity entity, Delegate eventDelegate, ComponentType componentType, Hash128 hash)
+            private unsafe void AddGameplayEvent(Entity entity, Delegate eventDelegate, ComponentType componentType,
+                Hash128 hash)
             {
                 if (!TryGetBlobAssetReference<EventPointer>(hash, out var result))
                 {
-                    var builder = new BlobBuilder(Allocator.Temp);
-                    ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
-                    eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
-                    result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
-                    builder.Dispose();
-                    AddBlobAssetWithCustomHash(ref result, hash);
-                    
+                    result = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate);
                     var blobMappingEntity = CreateAdditionalEntity(TransformUsageFlags.None);
                     AddComponent(blobMappingEntity, new GameplayEventBlobMapping
                     {
                         Hash = hash,
                         Pointer = result
                     });
+                    AddBlobAssetWithCustomHash(ref result, hash);
                 }
 
-                var resultPtr = new IntPtr(result.GetUnsafePtr());
-                var handle = GCHandle.Alloc(resultPtr, GCHandleType.Pinned);
-                try
+                if (componentType.IsComponent)
                 {
-                    GetType().GetMethod("UnsafeAddComponent", BindingFlags.Instance | BindingFlags.NonPublic)!
-                        .Invoke(this, new object[]
-                        {
-                            entity, componentType.TypeIndex, Marshal.SizeOf<EventPointer>(),
-                            handle.AddrOfPinnedObject()
-                        });
-                }
-                finally
-                {
-                    handle.Free();
+                    var resultPtr = new IntPtr(result.GetUnsafePtr());
+                    var handle = GCHandle.Alloc(resultPtr, GCHandleType.Pinned);
+                    try
+                    {
+                        GetType().GetMethod("UnsafeAddComponent", BindingFlags.Instance | BindingFlags.NonPublic)!
+                            .Invoke(this, new object[]
+                            {
+                                entity, componentType.TypeIndex, Marshal.SizeOf<EventPointer>(),
+                                handle.AddrOfPinnedObject()
+                            });
+                    }
+                    finally
+                    {
+                        handle.Free();
+                    }
                 }
             }
         }

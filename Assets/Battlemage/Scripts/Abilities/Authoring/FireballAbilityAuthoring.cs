@@ -3,7 +3,7 @@ using Battlemage.GameplayBehaviour.Data;
 using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
+using UnityEngine;
 
 namespace Battlemage.Abilities.Authoring
 {
@@ -13,13 +13,21 @@ namespace Battlemage.Abilities.Authoring
         [GameplayEvent(typeof(GameplayOnSpawnEvent))]
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
-            state.SetVelocity(self, new float3(1, 0, 0));
+            state.SetVelocity(self, state.GetForward(self) * 1.0f);
+            state.ScheduleEvent(self, 10.0f, DoExplode);
         }
         
         [GameplayEvent(typeof(GameplayOnHitEvent))]
         private static void OnHit(ref GameplayState state, ref Entity self, ref Entity target)
         {
-            state.DealDamage(0.1f, target);
+            state.DealDamage(self, 10.0f, target);
+            DoExplode(ref state, ref self);
+        }
+        
+        [GameplayEvent(typeof(GameplayScheduledEvent))]
+        private static void DoExplode(ref GameplayState state, ref Entity self)
+        {
+            Debug.Log("Fireball exploded!");
             state.MarkForDestroy(self);
         }
     }
