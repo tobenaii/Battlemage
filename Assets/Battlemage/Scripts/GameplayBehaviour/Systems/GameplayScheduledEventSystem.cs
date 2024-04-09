@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
 using Battlemage.GameplayBehaviour.Data.GameplayEvents;
+using Battlemage.GameplayBehaviour.Extensions;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -12,7 +13,9 @@ namespace Battlemage.GameplayBehaviour.Systems
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-            foreach (var (scheduledEvents, entity) in SystemAPI.Query<DynamicBuffer<GameplayScheduledEvent>>().WithEntityAccess())
+            foreach (var (scheduledEvents, eventMaps, entity) in SystemAPI
+                         .Query<DynamicBuffer<GameplayScheduledEvent>, DynamicBuffer<GameplayEventReference>>()
+                         .WithEntityAccess())
             {
                 for (var i = 0; i < scheduledEvents.Length; i++)
                 {
@@ -21,8 +24,9 @@ namespace Battlemage.GameplayBehaviour.Systems
                     {
                         var gameplayState = new GameplayState(ref state, ref ecb);
                         var source = entity;
-                        Marshal.GetDelegateForFunctionPointer<GameplayScheduledEvent.Delegate>(scheduledEvent
-                            .EventPointerRef.Value.Pointer).Invoke(ref gameplayState, ref source);
+                        var pointer = eventMaps.GetEventPointer(scheduledEvent.EventHash);
+                        Marshal.GetDelegateForFunctionPointer<GameplayScheduledEvent.Delegate>(pointer)
+                            .Invoke(ref gameplayState, ref source);
                         scheduledEvents.RemoveAt(i);
                         i--;
                     }
@@ -33,6 +37,7 @@ namespace Battlemage.GameplayBehaviour.Systems
                     }
                 }
             }
+
             ecb.Playback(state.EntityManager);
             ecb.Dispose();
         }

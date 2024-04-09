@@ -1,15 +1,11 @@
-﻿using System.Runtime.InteropServices;
-using Battlemage.Attributes.Data;
+﻿using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviour.Data.GameplayEvents;
 using Battlemage.GameplayBehaviour.Utilities;
 using BovineLabs.Core.Iterators;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
-using UnityEngine;
-using Hash128 = Unity.Entities.Hash128;
 
 namespace Battlemage.GameplayBehaviour.Data
 {
@@ -48,25 +44,9 @@ namespace Battlemage.GameplayBehaviour.Data
 
         public void ScheduleEvent(Entity entity, float time, GameplayScheduledEvent.Delegate scheduledEventDelegate)
         {
-            var eventPointerRef = GameplayBehaviourUtilities.FindEventPointerByHash(_state.EntityManager, new Hash128(
-                (uint)ComponentType.ReadOnly<GameplayScheduledEvent>().TypeIndex.GetHashCode(),
-                (uint)scheduledEventDelegate.Method.DeclaringType!.GetHashCode(),
-                (uint)scheduledEventDelegate.Method.Name.GetHashCode(), 0));
-            
-            if (!eventPointerRef.IsCreated)
-            {
-                eventPointerRef = GameplayBehaviourUtilities.CreateEventPointerBlob(scheduledEventDelegate);
-                var blobMappingEntity = _ecb.CreateEntity();
-                _ecb.AddComponent(blobMappingEntity, new GameplayEventBlobMapping
-                {
-                    Hash = GameplayBehaviourUtilities.GetEventHash(typeof(GameplayScheduledEvent), scheduledEventDelegate.Method.DeclaringType, scheduledEventDelegate.Method),
-                    Pointer = eventPointerRef
-                });
-            }
-            
             _state.EntityManager.GetBuffer<GameplayScheduledEvent>(entity).Add(new GameplayScheduledEvent()
             {
-                EventPointerRef = eventPointerRef,
+                EventHash = GameplayBehaviourUtilities.GetEventHash(typeof(GameplayScheduledEvent), scheduledEventDelegate.Method),
                 Time = time,
             });
         }

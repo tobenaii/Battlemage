@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Battlemage.GameplayBehaviour.Data;
-using Battlemage.GameplayBehaviour.Data.GameplayEvents;
+using Battlemage.GameplayBehaviour.Extensions;
 using Battlemage.GameplayBehaviour.Utilities;
-using Unity.Collections;
+using BovineLabs.Core.Iterators;
 using Unity.Entities;
 using UnityEngine;
 using Hash128 = Unity.Entities.Hash128;
@@ -26,55 +25,51 @@ namespace Battlemage.GameplayBehaviour.Authoring
                     Value = new Hash128(
                         (uint)gameplayBehaviour.GetType().GetHashCode(), 0, 0, 0)
                 });
-                foreach (var method in gameplayBehaviour.GetType()
-                             .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+
+                var methods = gameplayBehaviour.GetType()
+                    .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                var gameplayEventRefs = AddBuffer<GameplayEventReference>(entity);
+                foreach (var method in methods)
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
                     var delegateType = attribute.GameplayEventType.GetManagedType()
                         .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
                     var eventDelegate = Delegate.CreateDelegate(delegateType, method);
                     var componentType = attribute.GameplayEventType;
-                    var hash = GameplayBehaviourUtilities.GetEventHash(componentType, gameplayBehaviour.GetType(),
-                        method);
-                    
-                    AddGameplayEvent(entity, eventDelegate, componentType, hash);
+
+                    AddGameplayEvent(entity, gameplayBehaviour, componentType, eventDelegate, gameplayEventRefs);
                 }
-                AddBuffer<GameplayScheduledEvent>(entity);
             }
 
-            private unsafe void AddGameplayEvent(Entity entity, Delegate eventDelegate, ComponentType componentType,
-                Hash128 hash)
+            private void AddGameplayEvent(Entity entity, GameplayBehaviourAuthoring gameplayBehaviour,
+                ComponentType componentType, Delegate eventDelegate,
+                DynamicBuffer<GameplayEventReference> gameplayEventRefs)
             {
+                var hash = GameplayBehaviourUtilities.GetEventHash(componentType);
                 if (!TryGetBlobAssetReference<EventPointer>(hash, out var result))
                 {
                     result = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate);
                     var blobMappingEntity = CreateAdditionalEntity(TransformUsageFlags.None);
                     AddComponent(blobMappingEntity, new GameplayEventBlobMapping
                     {
-                        Hash = hash,
+                        Hash = GameplayBehaviourUtilities.GetEventHash(gameplayBehaviour.GetType(), componentType,
+                            eventDelegate.Method),
                         Pointer = result
                     });
                     AddBlobAssetWithCustomHash(ref result, hash);
                 }
 
-                if (componentType.IsComponent)
+                AddComponent(entity, componentType);
+                
+                var localHash = componentType.IsComponent
+                    ? GameplayBehaviourUtilities.GetEventHash(componentType)
+                    : GameplayBehaviourUtilities.GetEventHash(componentType, eventDelegate.Method);
+
+                gameplayEventRefs.Add(new GameplayEventReference()
                 {
-                    var resultPtr = new IntPtr(result.GetUnsafePtr());
-                    var handle = GCHandle.Alloc(resultPtr, GCHandleType.Pinned);
-                    try
-                    {
-                        GetType().GetMethod("UnsafeAddComponent", BindingFlags.Instance | BindingFlags.NonPublic)!
-                            .Invoke(this, new object[]
-                            {
-                                entity, componentType.TypeIndex, Marshal.SizeOf<EventPointer>(),
-                                handle.AddrOfPinnedObject()
-                            });
-                    }
-                    finally
-                    {
-                        handle.Free();
-                    }
-                }
+                    Hash = localHash,
+                    EventPointerRef = result
+                });
             }
         }
     }

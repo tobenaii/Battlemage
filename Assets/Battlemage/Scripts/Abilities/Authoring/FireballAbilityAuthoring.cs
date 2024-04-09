@@ -1,19 +1,17 @@
 ﻿using Battlemage.GameplayBehaviour.Authoring;
 using Battlemage.GameplayBehaviour.Data;
 using Battlemage.GameplayBehaviour.Data.GameplayEvents;
-using Unity.Burst;
 using Unity.Entities;
 using UnityEngine;
 
 namespace Battlemage.Abilities.Authoring
 {
-    [BurstCompile]
     public class FireballAbilityAuthoring : GameplayBehaviourAuthoring
     {
         [GameplayEvent(typeof(GameplayOnSpawnEvent))]
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
-            state.SetVelocity(self, state.GetForward(self) * 1.0f);
+            state.SetVelocity(self, state.GetForward(self) * 0.0f);
             state.ScheduleEvent(self, 10.0f, DoExplode);
         }
         
@@ -28,7 +26,7 @@ namespace Battlemage.Abilities.Authoring
         private static void DoExplode(ref GameplayState state, ref Entity self)
         {
             Debug.Log("Fireball exploded!");
-            state.MarkForDestroy(self);
+            //state.MarkForDestroy(self);
         }
     }
 }

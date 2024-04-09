@@ -29,12 +29,25 @@ namespace Battlemage.GameplayBehaviour.Utilities
             entities.Dispose();
             return eventPointerReference;
         }
-
-        public static Hash128 GetEventHash(ComponentType eventType, Type gameplayBehaviourType, MethodInfo method)
+        
+        public static Hash128 GetEventHash(ComponentType eventType)
         {
             return new Hash128(
+                (uint)eventType.TypeIndex.GetHashCode(), 0, 0, 0);
+        }
+        
+        public static Hash128 GetEventHash(ComponentType eventType, MethodInfo method)
+        {
+            return new Hash128(
+                (uint)eventType.TypeIndex.GetHashCode(), 
+                (uint)method.Name.GetHashCode(), 0, 0);
+        }
+        
+        public static Hash128 GetEventHash(Type gameplayBehaviour, ComponentType eventType, MethodInfo method)
+        {
+            return new Hash128(
+                (uint)gameplayBehaviour.GetHashCode(),
                 (uint)eventType.TypeIndex.GetHashCode(),
-                (uint)gameplayBehaviourType.GetHashCode(), 
                 (uint)method.Name.GetHashCode(), 0);
         }
 

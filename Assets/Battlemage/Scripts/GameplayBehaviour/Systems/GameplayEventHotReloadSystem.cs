@@ -53,31 +53,42 @@ namespace Battlemage.GameplayBehaviour.Systems
             {
                 prevMethodInfos = monoScript.GetClass().GetMethods(BindingFlags.Static | BindingFlags.NonPublic).ToList();
             }
-            var methodInfos = CompileEvents(monoScript).ToList();
+            
             var availableEvents = new List<(ComponentType type, Hash128 hash, Delegate eventDelegate)>();
+            
+            var methodInfos = CompileEvents(monoScript).ToList();
+            
             foreach (var methodInfo in methodInfos)
             {
                 var attribute = methodInfo.GetCustomAttribute<GameplayEventAttribute>();
                 var delegateType = attribute.GameplayEventType.GetManagedType().GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
-                var eventHash = GameplayBehaviourUtilities.GetEventHash(attribute.GameplayEventType, monoScript.GetClass(), methodInfo);
+                var eventHash = GameplayBehaviourUtilities.GetEventHash(monoScript.GetClass(), attribute.GameplayEventType, methodInfo);
                 var eventPointerBlob = GameplayBehaviourUtilities.FindEventPointerByHash(EntityManager, eventHash);
                 var eventDelegate = Delegate.CreateDelegate(delegateType, methodInfo);
                 availableEvents.Add((attribute.GameplayEventType, eventHash, eventDelegate));
                 if (!eventPointerBlob.IsCreated)
                 {
-                    continue;
+                    eventPointerBlob = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate);
+                    
+                    var blobMappingEntity = EntityManager.CreateEntity();
+                    EntityManager.AddComponentData(blobMappingEntity, new GameplayEventBlobMapping
+                    {
+                        Hash = eventHash,
+                        Pointer = eventPointerBlob
+                    });
                 }
-                eventPointerBlob.Value.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
+                var newPointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
+                eventPointerBlob.Value.Pointer = newPointer;
             }
-
+            
+            var addedEvents = availableEvents
+                .Where(availableEvent => !prevMethodInfos.Select(method => method.GetCustomAttribute<GameplayEventAttribute>().GameplayEventType).Contains(availableEvent.type)).ToList();
+            
             var removedMethods = prevMethodInfos
                 .Where(method =>
                     !availableEvents.Select(x => x.type).Contains(method.GetCustomAttribute<GameplayEventAttribute>()
                         .GameplayEventType))
                 .ToList();
-            
-            var addedEventTypes = availableEvents
-                .Where(availableEvent => !prevMethodInfos.Select(method => method.GetCustomAttribute<GameplayEventAttribute>().GameplayEventType).Contains(availableEvent.type)).ToList();
             
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             foreach (var (behaviourHash, entity) in SystemAPI.Query<GameplayBehaviourHash>().WithEntityAccess().WithOptions(EntityQueryOptions.IncludePrefab))
@@ -87,63 +98,30 @@ namespace Battlemage.GameplayBehaviour.Systems
                     continue;
                 }
 
-                foreach (var method in removedMethods)
-                {
-                    var eventAttribute = method.GetCustomAttribute<GameplayEventAttribute>();
-                    var eventType = eventAttribute.GameplayEventType;
-                    if (eventType.IsComponent && EntityManager.HasComponent(entity, eventType))
-                    {
-                        ecb.RemoveComponent(entity, eventType);
-                    }
-                    else if (eventType.IsBuffer)
-                    {
-                        var buffer = EntityManager.GetBuffer<GameplayScheduledEvent>(entity);
-                        var hash = GameplayBehaviourUtilities.GetEventHash(eventType, monoScript.GetType(), method);
-                        buffer.RemoveAt(buffer.IndexOf(x => x.EventPointerRef == GameplayBehaviourUtilities.FindEventPointerByHash(EntityManager, hash)));
-                    }
-                }
-
-                foreach (var gEvent in addedEventTypes)
+                foreach (var gEvent in addedEvents)
                 {
                     if (!EntityManager.HasComponent(entity, gEvent.type))
                     {
-                        AddGameplayEvent(entity, gEvent.eventDelegate, gEvent.type, gEvent.hash, ecb);
+                        Debug.Log("Adding Component");
+                        ecb.AddComponent(entity, gEvent.type);
+                    }
+                }
+                
+                foreach (var method in removedMethods)
+                {
+                    var type = method.GetCustomAttribute<GameplayEventAttribute>().GameplayEventType;
+                    if (type.IsComponent && EntityManager.HasComponent(entity, type))
+                    {
+                        Debug.Log("Removing Component: " + type.GetManagedType().Name);
+                        ecb.RemoveComponent(entity, type);
                     }
                 }
             }
+            
             ecb.Playback(EntityManager);
             ecb.Dispose();
             _methodInfos[monoHash] = methodInfos;
             Debug.Log($"Reloaded gameplay events: {monoScript.name}");
-        }
-        
-        private unsafe void AddGameplayEvent(Entity entity, Delegate eventDelegate, ComponentType componentType, Hash128 hash, EntityCommandBuffer ecb)
-        {
-            if (!componentType.IsComponent)
-                return;
-            var eventPointerReference = GameplayBehaviourUtilities.FindEventPointerByHash(EntityManager, hash);
-            if (!eventPointerReference.IsCreated)
-            {
-                eventPointerReference = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate);
-                    
-                var blobMappingEntity = ecb.CreateEntity();
-                ecb.AddComponent(blobMappingEntity, new GameplayEventBlobMapping
-                {
-                    Hash = hash,
-                    Pointer = eventPointerReference
-                });
-            }
-
-            var resultPtr = new IntPtr(eventPointerReference.GetUnsafePtr());
-            var handle = GCHandle.Alloc(resultPtr, GCHandleType.Pinned);
-            try
-            {
-                ecb.UnsafeAddComponent(entity, componentType.TypeIndex, Marshal.SizeOf<EventPointer>(), handle.AddrOfPinnedObject().ToPointer());
-            }
-            finally
-            {
-                handle.Free();
-            }
         }
         
         private static IEnumerable<MethodInfo> CompileEvents(MonoScript script)
@@ -156,11 +134,13 @@ namespace Battlemage.GameplayBehaviour.Systems
             var methodDeclarations = root
                 .DescendantNodes()
                 .OfType<MethodDeclarationSyntax>()
-                .Where(m => m.Modifiers.Any(SyntaxKind.StaticKeyword));
+                .Where(m => m.Modifiers.Any(SyntaxKind.StaticKeyword))
+                .Select(method => (MemberDeclarationSyntax)method)
+                .ToArray();
 
             MemberDeclarationSyntax memberDeclaration = SyntaxFactory.ClassDeclaration("Wrapper")
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword))
-                .AddMembers(methodDeclarations.ToArray());
+                .AddMembers(methodDeclarations);
 
             var compilationUnit = SyntaxFactory.CompilationUnit()
                 .AddUsings(usingStatements)
