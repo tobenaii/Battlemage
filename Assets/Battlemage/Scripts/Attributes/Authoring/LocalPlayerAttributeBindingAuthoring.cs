@@ -5,6 +5,7 @@ using Battlemage.Attributes.Systems;
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
+using Waddle.Attributes.Data;
 
 namespace Battlemage.Attributes.Authoring
 {
@@ -14,7 +15,7 @@ namespace Battlemage.Attributes.Authoring
         private class AttributeBindingMap
         {
             [HorizontalGroup, HideLabel]
-            public GameplayAttribute Attribute;
+            public BattlemageAttribute Attribute;
             [HorizontalGroup, HideLabel]
             public AttributeBindingObject Binding;
         }

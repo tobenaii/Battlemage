@@ -1,8 +1,9 @@
-﻿using Battlemage.GameplayBehaviour.Authoring;
-using Battlemage.GameplayBehaviour.Data;
-using Battlemage.GameplayBehaviour.Data.GameplayEvents;
+﻿using Battlemage.GameplayBehaviours.Data;
+using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Unity.Entities;
 using UnityEngine;
+using Waddle.GameplayBehaviour.Authoring;
+using Waddle.GameplayBehaviour.Data;
 
 namespace Battlemage.Abilities.Authoring
 {

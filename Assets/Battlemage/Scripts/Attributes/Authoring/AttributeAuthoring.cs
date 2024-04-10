@@ -5,6 +5,7 @@ using BovineLabs.Core.Iterators;
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
+using Waddle.Attributes.Data;
 
 namespace Battlemage.Attributes.Authoring
 {
@@ -17,14 +18,14 @@ namespace Battlemage.Attributes.Authoring
         public class AttributeWithValue
         {
             [HorizontalGroup]
-            [SerializeField, HideLabel] private GameplayAttribute _attribute;
+            [SerializeField, HideLabel] private BattlemageAttribute _attribute;
             [HorizontalGroup]
             [SerializeField, HideLabel] private float _value;
 
-            public GameplayAttribute Attribute => _attribute;
+            public BattlemageAttribute Attribute => _attribute;
             public float Value => _value;
 
-            public AttributeWithValue(GameplayAttribute attribute)
+            public AttributeWithValue(BattlemageAttribute attribute)
             {
                 _attribute = attribute;
             }

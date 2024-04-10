@@ -17,7 +17,10 @@ namespace Battlemage.PlayerController.Systems
         {
             RequireForUpdate(SystemAPI.QueryBuilder().WithAll<Data.PlayerController, PlayerCharacterInputs>().Build());
             RequireForUpdate<NetworkTime>();
-
+            
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            
             // Create the input user
             _playerInput = new PlayerInput();
             _playerInput.Enable();
