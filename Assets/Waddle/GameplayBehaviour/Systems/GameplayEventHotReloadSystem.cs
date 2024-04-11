@@ -146,7 +146,7 @@ namespace Waddle.GameplayBehaviour.Systems
             
             var references = script.GetClass().Assembly.GetReferencedAssemblies()
                 .Append(typeof(object).Assembly.GetName())
-                .Append(typeof(GameplayBehaviourAuthoring).Assembly.GetName());
+                .Append(script.GetClass().Assembly.GetName());
             var compilation = CSharpCompilation.Create("DynamicAssembly",
                     options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .AddReferences(references.Select(assemblyName => MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location)))
