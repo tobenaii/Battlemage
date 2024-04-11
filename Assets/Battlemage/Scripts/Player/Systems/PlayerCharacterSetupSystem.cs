@@ -1,17 +1,17 @@
 ﻿using Battlemage.Player.Data;
-using Battlemage.Utilities;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 using Waddle.Camera.Data;
 using Waddle.FirstPersonCharacter.Data;
+using Waddle.FirstPersonCharacter.Utilities;
 
-namespace Waddle.FirstPersonCharacter.Systems
+namespace Battlemage.Player.Systems
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [BurstCompile]
-    public partial struct ClientCharacterSetupSystem : ISystem
+    public partial struct PlayerCharacterSetupSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
         {
@@ -33,7 +33,7 @@ namespace Waddle.FirstPersonCharacter.Systems
                 
                 // Make local character meshes rendering be shadow-only
                 BufferLookup<Child> childBufferLookup = SystemAPI.GetBufferLookup<Child>();
-                MiscUtilities.SetShadowModeInHierarchy(state.EntityManager, ecb, entity, ref childBufferLookup, UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly);
+                CharacterUtilities.SetShadowModeInHierarchy(state.EntityManager, ecb, entity, ref childBufferLookup, UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly);
                 
                 ecb.AddComponent<CharacterSetupTag>(entity);
             }

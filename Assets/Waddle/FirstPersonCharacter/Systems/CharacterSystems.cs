@@ -10,7 +10,6 @@ using Unity.Transforms;
 using Waddle.FirstPersonCharacter.Data;
 using Waddle.FirstPersonCharacter.Utilities;
 using CharacterAspect = Waddle.FirstPersonCharacter.Data.CharacterAspect;
-using FirstPersonPlayerVariableStepControlSystem = Battlemage.PlayerController.Systems.FirstPersonPlayerVariableStepControlSystem;
 
 namespace Waddle.FirstPersonCharacter.Systems
 {
@@ -162,7 +161,6 @@ namespace Waddle.FirstPersonCharacter.Systems
 
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     [UpdateAfter(typeof(PredictedFixedStepSimulationSystemGroup))]
-    [UpdateAfter(typeof(FirstPersonPlayerVariableStepControlSystem))]
     [UpdateAfter(typeof(BuildCharacterPredictedRotationSystem))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     [BurstCompile]

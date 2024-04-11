@@ -1,5 +1,4 @@
-﻿using Battlemage.Attributes.Data;
-using Unity.Entities;
+﻿using Unity.Entities;
 
 namespace Waddle.GameplayEffect.Data
 {
@@ -19,7 +18,7 @@ namespace Waddle.GameplayEffect.Data
             Override,
         }
         
-        public BattlemageAttribute ModAttribute;
+        public byte ModAttribute;
         public Operation OperationType;
         public float SourceValue;
     }
