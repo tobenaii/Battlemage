@@ -22,7 +22,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                          .WithAll<GameplayOnSpawnEvent>()
                          .WithEntityAccess())
             {
-                var gameplayState = new GameplayState(ref state, ref ecb);
+                var gameplayState = new GameplayState(state.EntityManager, ref ecb);
                 var source = entity;
                 var pointer = eventRefs.GetEventPointer(EventHash);
                 Marshal.GetDelegateForFunctionPointer<GameplayOnSpawnEvent.Delegate>(pointer).Invoke(ref gameplayState, ref source);

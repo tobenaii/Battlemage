@@ -1,4 +1,5 @@
 ﻿using System;
+using Battlemage.GameplayBehaviours.Data.InputEvents;
 using Unity.Mathematics;
 using Unity.NetCode;
 
@@ -9,6 +10,6 @@ namespace Battlemage.PlayerController.Data
     {
         public float2 MoveInput;
         public float2 LookInputDelta;
-        public InputEvent JumpPressed;
+        public ButtonState JumpState;
     }
 }

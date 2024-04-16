@@ -52,7 +52,7 @@ namespace Battlemage.Player.Systems
 
                 var playerEntity = commandBuffer.Instantiate(playerPrefab);
                 var player = SystemAPI.GetComponent<PlayerController.Data.PlayerController>(playerPrefab);
-                player.Value = playerCharacter;
+                player.Character = playerCharacter;
                 commandBuffer.SetComponent(playerEntity, player);
                 commandBuffer.SetComponent(playerEntity, new GhostOwner { NetworkId = networkId.Value });
             }

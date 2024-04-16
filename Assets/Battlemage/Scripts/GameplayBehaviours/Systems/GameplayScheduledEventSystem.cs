@@ -23,7 +23,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                     var scheduledEvent = scheduledEvents[i];
                     if (scheduledEvent.Time <= 0)
                     {
-                        var gameplayState = new GameplayState(ref state, ref ecb);
+                        var gameplayState = new GameplayState(state.EntityManager, ref ecb);
                         var source = entity;
                         var pointer = eventMaps.GetEventPointer(scheduledEvent.EventHash);
                         Marshal.GetDelegateForFunctionPointer<GameplayScheduledEvent.Delegate>(pointer)

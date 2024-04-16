@@ -48,7 +48,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                 {
                     var ability = entity;
                     var target = _hits[0].Entity;
-                    var gameplayState = new GameplayState(ref state, ref ecb);
+                    var gameplayState = new GameplayState(state.EntityManager, ref ecb);
                     var pointer = eventRefs.GetEventPointer(EventHash);
                     Marshal.GetDelegateForFunctionPointer<GameplayOnHitEvent.Delegate>(pointer).Invoke(ref gameplayState, ref ability, ref target);
                 }
