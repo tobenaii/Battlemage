@@ -10,6 +10,7 @@ namespace Battlemage.PlayerController.Data
     {
         public float2 MoveInput;
         public float2 LookInputDelta;
-        public ButtonState JumpState;
+        public ButtonState Jump;
+        public ButtonState PrimaryAbility;
     }
 }

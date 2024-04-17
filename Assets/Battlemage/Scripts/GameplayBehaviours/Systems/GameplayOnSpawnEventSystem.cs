@@ -3,6 +3,7 @@ using Battlemage.GameplayBehaviours.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.NetCode;
 using Waddle.GameplayBehaviour.Data;
 using Waddle.GameplayBehaviour.Extensions;
 using Waddle.GameplayBehaviour.Utilities;
@@ -10,7 +11,8 @@ using Hash128 = Unity.Entities.Hash128;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ClientSimulation)]
     public partial struct GameplayOnSpawnEventSystem : ISystem
     {
         private static readonly Hash128 EventHash = GameplayBehaviourUtilities.GetEventHash(typeof(GameplayOnSpawnEvent));

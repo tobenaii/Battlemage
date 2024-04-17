@@ -20,10 +20,9 @@ namespace Battlemage.PlayerController.Systems
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
             
-            // Create the input user
             _playerInput = new PlayerInput();
             _playerInput.Enable();
-            _playerInput.DefaultMap.Enable();
+            _playerInput.Gameplay.Enable();
             RequireForUpdate<NetworkTime>();
         }
 
@@ -32,33 +31,43 @@ namespace Battlemage.PlayerController.Systems
         {
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
             var currentTick = networkTime.ServerTick;
-            var defaultActionsMap = _playerInput.DefaultMap;
+            var gameplayActions = _playerInput.Gameplay;
             foreach (var playerCommands in SystemAPI
                          .Query<RefRW<PlayerCharacterInputs>>()
                          .WithAll<GhostOwnerIsLocal>())
             {
                 playerCommands.ValueRW.MoveInput =
-                    Vector2.ClampMagnitude(defaultActionsMap.Move.ReadValue<Vector2>(), 1f);
+                    Vector2.ClampMagnitude(gameplayActions.Move.ReadValue<Vector2>(), 1f);
 
-                float2 mouseLookInputDelta = defaultActionsMap.LookDelta.ReadValue<Vector2>() * 1.0f;
+                float2 mouseLookInputDelta = gameplayActions.Look.ReadValue<Vector2>() * 1.0f;
                 if (_prevTick != currentTick)
                 {
                     playerCommands.ValueRW.LookInputDelta.x = 0;
                     playerCommands.ValueRW.LookInputDelta.y = 0;
                     _prevTick = currentTick;
-                    playerCommands.ValueRW.JumpState = default;
+                    playerCommands.ValueRW.Jump = default;
+                    playerCommands.ValueRW.PrimaryAbility = default;
                 }
 
                 playerCommands.ValueRW.LookInputDelta.x += mouseLookInputDelta.x;
                 playerCommands.ValueRW.LookInputDelta.y += mouseLookInputDelta.y;
 
-                if (defaultActionsMap.Jump.WasPressedThisFrame())
+                if (gameplayActions.Jump.WasPressedThisFrame())
                 {
-                    playerCommands.ValueRW.JumpState.Pressed();
+                    playerCommands.ValueRW.Jump.Pressed();
                 }
-                else if (defaultActionsMap.Jump.WasReleasedThisFrame())
+                else if (gameplayActions.Jump.WasReleasedThisFrame())
                 {
-                    playerCommands.ValueRW.JumpState.Released();
+                    playerCommands.ValueRW.Jump.Released();
+                }
+                
+                if (gameplayActions.PrimaryAbility.WasPressedThisFrame())
+                {
+                    playerCommands.ValueRW.PrimaryAbility.Pressed();
+                }
+                else if (gameplayActions.PrimaryAbility.WasReleasedThisFrame())
+                {
+                    playerCommands.ValueRW.PrimaryAbility.Released();
                 }
             }
         }

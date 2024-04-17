@@ -1,11 +1,15 @@
 using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+using BovineLabs.Core.Extensions;
 using BovineLabs.Core.Iterators;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
+using Waddle.Abilities.Data;
 using Waddle.Attributes.Data;
+using Waddle.Attributes.Extensions;
 using Waddle.GameplayBehaviour.Utilities;
 
 namespace Battlemage.GameplayBehaviours.Data
@@ -30,6 +34,15 @@ namespace Battlemage.GameplayBehaviours.Data
         {
             _entityManager.SetComponentData(entity, component);
         }
+
+        public void TryActivateAbility(Entity entity, Entity abilityPrefab)
+        {
+            var requests = _entityManager.GetBuffer<AbilityActivateRequest>(entity);
+            requests.Add(new AbilityActivateRequest()
+            {
+                AbilityPrefab = abilityPrefab
+            });
+        }
         
         public void MarkForDestroy(Entity entity)
         {
@@ -46,8 +59,7 @@ namespace Battlemage.GameplayBehaviours.Data
 
         public void DealDamage(Entity source, float amount, Entity target)
         {
-            var attributeMap = _entityManager.GetBuffer<AttributeMap>(target)
-                .AsHashMap<AttributeMap, byte, AttributeValue>();
+            var attributeMap = _entityManager.GetBuffer<AttributeMap>(target).AsMap();
             var health = attributeMap[(byte)BattlemageAttribute.Health];
             health.CurrentValue -= amount;
             attributeMap[(byte)BattlemageAttribute.Health] = health;

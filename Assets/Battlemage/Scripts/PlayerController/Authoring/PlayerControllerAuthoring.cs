@@ -4,6 +4,8 @@ using Battlemage.PlayerController.Data;
 using Unity.CharacterController;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
+using Waddle.Abilities.Data;
 using Waddle.FirstPersonCharacter.Data;
 using Waddle.GameplayBehaviour.Authoring;
 using Waddle.GameplayBehaviour.Data;
@@ -43,12 +45,27 @@ namespace Battlemage.PlayerController.Authoring
             state.SetComponent(character, characterCommands);
         }
 
+        [GameplayEvent(typeof(InputPrimaryAbilityEvent))]
+        private static void OnPrimaryAbility(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
+        {
+            if (buttonState.WasPressed)
+            {
+                var character = state.GetComponent<Data.PlayerController>(self).Character;
+                state.TryActivateAbility(character, state.GetComponent<Data.PlayerController>(self).PrimaryAbilityPrefab);
+            }
+        }
+
+        [SerializeField] private GameObject _primaryAbilityPrefab;
+
         public class Baker : Baker<PlayerControllerAuthoring>
         {
             public override void Bake(PlayerControllerAuthoring authoring)
             {
-                Entity entity = GetEntity(TransformUsageFlags.None);
-                AddComponent(entity, new Data.PlayerController());
+                var entity = GetEntity(TransformUsageFlags.None);
+                AddComponent(entity, new Data.PlayerController()
+                {
+                    PrimaryAbilityPrefab = GetEntity(authoring._primaryAbilityPrefab, TransformUsageFlags.Dynamic)
+                });
                 AddComponent<PlayerCharacterInputs>(entity);
             }
         }

@@ -1,5 +1,4 @@
-using System.Linq;
-using Unity.Multiplayer.Playmode;
+using ParrelSync;
 using Unity.NetCode;
 
 // Create a custom bootstrap, which enables auto-connect.
@@ -13,10 +12,8 @@ namespace Battlemage.Game.Systems
         public override bool Initialize(string defaultWorldName)
         {
             AutoConnectPort = 7979; // Enabled auto connect
-
-            var tags = CurrentPlayer.ReadOnlyTags();
-
-            if (tags.Contains("Server"))
+            
+            if (!ClonesManager.IsClone())
             {
                 CreateServerWorld("Server World");
             }
