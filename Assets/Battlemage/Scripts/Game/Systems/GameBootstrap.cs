@@ -15,7 +15,14 @@ namespace Battlemage.Game.Systems
             
             if (!ClonesManager.IsClone())
             {
-                CreateServerWorld("Server World");
+                var serverWorld = CreateServerWorld("Server World");
+                var tickRate = new ClientServerTickRate();
+                tickRate.ResolveDefaults();
+                tickRate.SimulationTickRate = 60;
+                tickRate.NetworkTickRate = 30;
+                tickRate.MaxSimulationStepsPerFrame = 3;
+                tickRate.PredictedFixedStepSimulationTickRatio = 1;
+                serverWorld.EntityManager.CreateSingleton(tickRate);
             }
             CreateClientWorld("Client World");
 
