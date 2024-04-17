@@ -81,7 +81,7 @@ namespace Battlemage.GameplayBehaviours.Data
         
         public float3 GetRight(Entity entity)
         {
-            return _entityManager.GetComponentData<LocalToWorld>(entity).Right();
+            return _entityManager.GetComponentData<LocalTransform>(entity).Right();
         }
     }
 }
