@@ -127,6 +127,7 @@ namespace Waddle.GameplayBehaviour.Systems
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(AssetDatabase.GetAssetPath(script)));
             var root = syntaxTree.GetCompilationUnitRoot();
 
+            var rootNamespace = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
             var usingStatements = root.Usings.ToArray();
             
             var methodDeclarations = root
@@ -136,9 +137,10 @@ namespace Waddle.GameplayBehaviour.Systems
                 .Select(method => (MemberDeclarationSyntax)method)
                 .ToArray();
 
-            MemberDeclarationSyntax memberDeclaration = SyntaxFactory.ClassDeclaration("Wrapper")
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword))
-                .AddMembers(methodDeclarations);
+            MemberDeclarationSyntax memberDeclaration = SyntaxFactory.NamespaceDeclaration(rootNamespace!.Name)
+                .AddMembers(SyntaxFactory.ClassDeclaration("Wrapper")
+                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword))
+                    .AddMembers(methodDeclarations));
 
             var compilationUnit = SyntaxFactory.CompilationUnit()
                 .AddUsings(usingStatements)
@@ -159,7 +161,7 @@ namespace Waddle.GameplayBehaviour.Systems
             {
                 ms.Seek(0, SeekOrigin.Begin);
                 var assembly = Assembly.Load(ms.ToArray());
-                var type = assembly.GetType("Wrapper");
+                var type = assembly.GetType($"{rootNamespace.Name}.Wrapper");
                 var methodInfos = type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic);
                 return methodInfos;
             }
