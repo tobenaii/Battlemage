@@ -51,9 +51,9 @@ namespace Battlemage.GameplayBehaviours.Data
 
         public void SetVelocity(Entity entity, float3 velocity)
         {
-            _entityManager.SetComponentData(entity, new PhysicsVelocity()
+            _entityManager.SetComponentData(entity, new Velocity.Data.Velocity()
             {
-                Linear = velocity,
+                Value = velocity,
             });
         }
 
@@ -76,12 +76,12 @@ namespace Battlemage.GameplayBehaviours.Data
 
         public float3 GetForward(Entity entity)
         {
-            return _entityManager.GetComponentData<LocalToWorld>(entity).Forward;
+            return _entityManager.GetComponentData<LocalTransform>(entity).Forward();
         }
         
         public float3 GetRight(Entity entity)
         {
-            return _entityManager.GetComponentData<LocalToWorld>(entity).Right;
+            return _entityManager.GetComponentData<LocalToWorld>(entity).Right();
         }
     }
 }

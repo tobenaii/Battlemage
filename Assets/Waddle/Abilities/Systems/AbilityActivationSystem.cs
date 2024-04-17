@@ -45,7 +45,6 @@ namespace Waddle.Abilities.Systems
 
                     if (succeeded && networkTime.IsFirstTimeFullyPredictingTick)
                     {
-                        Debug.Log(state.WorldUnmanaged.IsServer());
                         var ability = ecb.Instantiate(request.AbilityPrefab);
                         ecb.SetComponent(ability, new AbilityData()
                         {

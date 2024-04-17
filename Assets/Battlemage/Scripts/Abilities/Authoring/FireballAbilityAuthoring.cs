@@ -26,5 +26,14 @@ namespace Battlemage.Abilities.Authoring
         {
             //Debug.Log("Fireball exploded!");
         }
+
+        public class FireballAbilityAuthoringBaker : Baker<FireballAbilityAuthoring>
+        {
+            public override void Bake(FireballAbilityAuthoring authoring)
+            {
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent(entity, new Velocity.Data.Velocity());
+            }
+        }
     }
 }
