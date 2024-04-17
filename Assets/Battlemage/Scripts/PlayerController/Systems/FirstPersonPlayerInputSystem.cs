@@ -46,12 +46,12 @@ namespace Battlemage.PlayerController.Systems
                     playerCommands.ValueRW.LookInputDelta.x = 0;
                     playerCommands.ValueRW.LookInputDelta.y = 0;
                     _prevTick = currentTick;
+                    playerCommands.ValueRW.JumpState = default;
                 }
 
                 playerCommands.ValueRW.LookInputDelta.x += mouseLookInputDelta.x;
                 playerCommands.ValueRW.LookInputDelta.y += mouseLookInputDelta.y;
 
-                playerCommands.ValueRW.JumpState = default;
                 if (defaultActionsMap.Jump.WasPressedThisFrame())
                 {
                     playerCommands.ValueRW.JumpState.Pressed();
