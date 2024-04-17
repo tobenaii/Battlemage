@@ -4,14 +4,12 @@ using Battlemage.PlayerController.Data;
 using Unity.CharacterController;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 using Waddle.FirstPersonCharacter.Data;
 using Waddle.GameplayBehaviour.Authoring;
 using Waddle.GameplayBehaviour.Data;
 
 namespace Battlemage.PlayerController.Authoring
 {
-    [DisallowMultipleComponent]
     public class PlayerControllerAuthoring : GameplayBehaviourAuthoring
     {
         [GameplayEvent(typeof(InputJumpEvent))]
