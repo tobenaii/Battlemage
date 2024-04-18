@@ -14,7 +14,7 @@ using Hash128 = Unity.Entities.Hash128;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderFirst = true)]
     [UpdateBefore(typeof(FirstPersonCharacterVariableUpdateSystem))]
     [UpdateAfter(typeof(BuildCharacterPredictedRotationSystem))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]

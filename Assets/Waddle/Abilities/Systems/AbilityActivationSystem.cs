@@ -1,14 +1,13 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
 using Waddle.Abilities.Data;
 using Waddle.Attributes.Data;
 using Waddle.Attributes.Extensions;
 
 namespace Waddle.Abilities.Systems
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderLast = true)]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct AbilityActivationSystem : ISystem
     {
