@@ -1,21 +1,26 @@
-﻿namespace Battlemage.GameplayBehaviours.Data.InputEvents
+﻿using System.Runtime.InteropServices;
+
+namespace Battlemage.GameplayBehaviours.Data.InputEvents
 {
     public struct ButtonState
     {
+        [MarshalAs(UnmanagedType.U1)]
         public bool WasPressed;
+        [MarshalAs(UnmanagedType.U1)]
         public bool WasReleased;
+        [MarshalAs(UnmanagedType.U1)]
         public bool IsDown;
 
         public void Pressed()
         {
-            this.WasPressed = true;
-            this.IsDown = true;
+            WasPressed = true;
+            IsDown = true;
         }
 
         public void Released()
         {
-            this.IsDown = false;
-            this.WasReleased = true;
+            IsDown = false;
+            WasReleased = true;
         }
     }
 }

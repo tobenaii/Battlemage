@@ -1,20 +1,21 @@
 using Battlemage.GameplayBehaviours.Data;
 using Battlemage.GameplayBehaviours.Data.InputEvents;
 using Battlemage.PlayerController.Data;
+using Unity.Burst;
 using Unity.CharacterController;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using Waddle.Abilities.Data;
 using Waddle.FirstPersonCharacter.Data;
 using Waddle.GameplayBehaviour.Authoring;
 using Waddle.GameplayBehaviour.Data;
 
 namespace Battlemage.PlayerController.Authoring
 {
+    [BurstCompile]
     public class PlayerControllerAuthoring : GameplayBehaviourAuthoring
     {
-        [GameplayEvent(typeof(InputJumpEvent))]
+        [GameplayEvent(typeof(InputJumpEvent)), BurstCompile]
         private static void OnJump(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
@@ -23,7 +24,7 @@ namespace Battlemage.PlayerController.Authoring
             state.SetComponent(character, characterCommands);
         }
         
-        [GameplayEvent(typeof(InputLookEvent))]
+        [GameplayEvent(typeof(InputLookEvent)), BurstCompile]
         private static void OnLook(ref GameplayState state, ref Entity self, ref float2 value)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
@@ -32,7 +33,7 @@ namespace Battlemage.PlayerController.Authoring
             state.SetComponent(character, characterCommands);
         }
         
-        [GameplayEvent(typeof(InputMoveEvent))]
+        [GameplayEvent(typeof(InputMoveEvent)), BurstCompile]
         private static void OnMove(ref GameplayState state, ref Entity self, ref float2 value)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
@@ -45,7 +46,7 @@ namespace Battlemage.PlayerController.Authoring
             state.SetComponent(character, characterCommands);
         }
 
-        [GameplayEvent(typeof(InputPrimaryAbilityEvent))]
+        [GameplayEvent(typeof(InputPrimaryAbilityEvent)), BurstCompile]
         private static void OnPrimaryAbility(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
         {
             if (buttonState.WasPressed)

@@ -1,11 +1,8 @@
 using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
-using BovineLabs.Core.Extensions;
-using BovineLabs.Core.Iterators;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
-using Unity.Physics;
 using Unity.Transforms;
 using Waddle.Abilities.Data;
 using Waddle.Attributes.Data;
@@ -14,6 +11,7 @@ using Waddle.GameplayBehaviour.Utilities;
 
 namespace Battlemage.GameplayBehaviours.Data
 {
+    [BurstCompile]
     public ref struct GameplayState
     {
         private EntityManager _entityManager;
@@ -25,16 +23,19 @@ namespace Battlemage.GameplayBehaviours.Data
             _ecb = ecb;
         }
 
+        [BurstCompile]
         public T GetComponent<T>(Entity entity) where T : unmanaged, IComponentData
         {
             return _entityManager.GetComponentData<T>(entity);
         }
         
+        [BurstCompile]
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponentData
         {
             _entityManager.SetComponentData(entity, component);
         }
 
+        [BurstCompile]
         public void TryActivateAbility(Entity entity, Entity abilityPrefab)
         {
             var requests = _entityManager.GetBuffer<AbilityActivateRequest>(entity);
@@ -44,11 +45,13 @@ namespace Battlemage.GameplayBehaviours.Data
             });
         }
         
+        [BurstCompile]
         public void MarkForDestroy(Entity entity)
         {
             _ecb.DestroyEntity(entity);
         }
 
+        [BurstCompile]
         public void SetVelocity(Entity entity, float3 velocity)
         {
             _entityManager.SetComponentData(entity, new Velocity.Data.Velocity()
@@ -57,6 +60,7 @@ namespace Battlemage.GameplayBehaviours.Data
             });
         }
 
+        [BurstCompile]
         public void DealDamage(Entity source, float amount, Entity target)
         {
             var attributeMap = _entityManager.GetBuffer<AttributeMap>(target).AsMap();
@@ -65,6 +69,7 @@ namespace Battlemage.GameplayBehaviours.Data
             attributeMap[(byte)BattlemageAttribute.Health] = health;
         }
 
+        [BurstCompile]
         public void ScheduleEvent(Entity entity, float time, GameplayScheduledEvent.Delegate scheduledEventDelegate)
         {
             _entityManager.GetBuffer<GameplayScheduledEvent>(entity).Add(new GameplayScheduledEvent()
@@ -74,11 +79,13 @@ namespace Battlemage.GameplayBehaviours.Data
             });
         }
 
+        [BurstCompile]
         public float3 GetForward(Entity entity)
         {
             return _entityManager.GetComponentData<LocalTransform>(entity).Forward();
         }
         
+        [BurstCompile]
         public float3 GetRight(Entity entity)
         {
             return _entityManager.GetComponentData<LocalTransform>(entity).Right();

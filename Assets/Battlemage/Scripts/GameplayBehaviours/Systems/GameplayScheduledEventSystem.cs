@@ -1,6 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using Battlemage.GameplayBehaviours.Data;
+﻿using Battlemage.GameplayBehaviours.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Waddle.GameplayBehaviour.Data;
@@ -8,12 +8,15 @@ using Waddle.GameplayBehaviour.Extensions;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
+    [BurstCompile]
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayScheduledEventSystem : ISystem
     {
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
+
             foreach (var (scheduledEvents, eventMaps, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayScheduledEvent>, DynamicBuffer<GameplayEventReference>>()
                          .WithEntityAccess())
@@ -26,8 +29,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                         var gameplayState = new GameplayState(state.EntityManager, ref ecb);
                         var source = entity;
                         var pointer = eventMaps.GetEventPointer(scheduledEvent.EventHash);
-                        Marshal.GetDelegateForFunctionPointer<GameplayScheduledEvent.Delegate>(pointer)
-                            .Invoke(ref gameplayState, ref source);
+                        new FunctionPointer<GameplayScheduledEvent.Delegate>(pointer).Invoke(ref gameplayState, ref source);
                         scheduledEvents.RemoveAt(i);
                         i--;
                     }

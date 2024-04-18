@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using Unity.Entities;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Waddle.GameplayBehaviour.Authoring
                 var methods = gameplayBehaviour.GetType()
                     .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 var gameplayEventRefs = AddBuffer<GameplayEventReference>(entity);
-                foreach (var method in methods)
+                foreach (var method in methods.Where(x => x.Name.Contains("$BurstManaged")))
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
                     var delegateType = attribute.GameplayEventType.GetManagedType()
@@ -46,7 +47,7 @@ namespace Waddle.GameplayBehaviour.Authoring
                 var hash = GameplayBehaviourUtilities.GetEventHash(componentType);
                 if (!TryGetBlobAssetReference<EventPointer>(hash, out var result))
                 {
-                    result = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate);
+                    result = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate, true);
                     var blobMappingEntity = CreateAdditionalEntity(TransformUsageFlags.None);
                     AddComponent(blobMappingEntity, new GameplayEventBlobMapping
                     {

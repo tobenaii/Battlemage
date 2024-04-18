@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using BovineLabs.Core.Extensions;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Waddle.GameplayBehaviour.Data;
@@ -40,7 +41,7 @@ namespace Waddle.GameplayBehaviour.Utilities
         {
             return new Hash128(
                 (uint)eventType.TypeIndex.GetHashCode(), 
-                (uint)method.Name.GetHashCode(), 0, 0);
+                (uint)GetCleanMethodName(method).GetHashCode(), 0, 0);
         }
         
         public static Hash128 GetEventHash(Type gameplayBehaviour, ComponentType eventType, MethodInfo method)
@@ -48,14 +49,26 @@ namespace Waddle.GameplayBehaviour.Utilities
             return new Hash128(
                 (uint)gameplayBehaviour.GetHashCode(),
                 (uint)eventType.TypeIndex.GetHashCode(),
-                (uint)method.Name.GetHashCode(), 0);
+                (uint)GetCleanMethodName(method).GetHashCode(), 0);
         }
 
-        public static BlobAssetReference<EventPointer> CreateEventPointerBlob(Delegate eventDelegate)
+        private static string GetCleanMethodName(MethodInfo method)
+        {
+            return method.Name.Replace("$BurstManaged", "");
+        }
+
+        public static BlobAssetReference<EventPointer> CreateEventPointerBlob(Delegate eventDelegate, bool burstCompiled)
         {
             var builder = new BlobBuilder(Allocator.Temp);
             ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
-            eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
+            if (burstCompiled)
+            {
+                eventPointer.Pointer = BurstCompiler.CompileFunctionPointer(eventDelegate).Value;
+            }
+            else
+            {
+                eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
+            }
             var result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
             builder.Dispose();
             return result;

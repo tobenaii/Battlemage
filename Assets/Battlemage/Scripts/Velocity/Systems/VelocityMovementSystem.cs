@@ -1,18 +1,32 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 
 namespace Battlemage.Velocity.Systems
 {
+    [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct VelocityMovementSystem : ISystem
     {
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var (velocity, transform) in SystemAPI.Query<RefRO<Data.Velocity>, RefRW<LocalTransform>>().WithAll<Simulate>())
+            state.Dependency = new Job
             {
-                transform.ValueRW.Position += velocity.ValueRO.Value * SystemAPI.Time.DeltaTime;
+                DeltaTime = SystemAPI.Time.DeltaTime
+            }.ScheduleParallel(state.Dependency);
+        }
+
+        [BurstCompile, WithAll(typeof(Simulate))]
+        private partial struct Job : IJobEntity
+        {
+            public float DeltaTime;
+            
+            private void Execute(in Data.Velocity velocity, ref LocalTransform localTransform)
+            {
+                localTransform.Position += velocity.Value * DeltaTime;
             }
         }
     }

@@ -1,30 +1,25 @@
 ﻿using Battlemage.GameplayBehaviours.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+using Unity.Burst;
 using Unity.Entities;
 using Waddle.GameplayBehaviour.Authoring;
 using Waddle.GameplayBehaviour.Data;
 
 namespace Battlemage.Abilities.Authoring
 {
+    [BurstCompile]
     public class FireballAbilityAuthoring : GameplayBehaviourAuthoring
     {
-        [GameplayEvent(typeof(GameplayOnSpawnEvent))]
+        [GameplayEvent(typeof(GameplayOnSpawnEvent)), BurstCompile]
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
             state.SetVelocity(self, state.GetForward(self) * 1.0f);
-            state.ScheduleEvent(self, 10.0f, DoExplode);
         }
         
-        [GameplayEvent(typeof(GameplayOnHitEvent))]
+        [GameplayEvent(typeof(GameplayOnHitEvent)), BurstCompile]
         private static void OnHit(ref GameplayState state, ref Entity self, ref Entity target)
         {
-            DoExplode(ref state, ref self);
-        }
-        
-        [GameplayEvent(typeof(GameplayScheduledEvent))]
-        private static void DoExplode(ref GameplayState state, ref Entity self)
-        {
-            //Debug.Log("Fireball exploded!");
+            state.DealDamage(self, 1.0f, target);
         }
 
         public class FireballAbilityAuthoringBaker : Baker<FireballAbilityAuthoring>

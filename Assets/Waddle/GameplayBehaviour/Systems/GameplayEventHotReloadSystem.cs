@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -66,7 +67,7 @@ namespace Waddle.GameplayBehaviour.Systems
                 availableEvents.Add((attribute.GameplayEventType, eventHash, eventDelegate));
                 if (!eventPointerBlob.IsCreated)
                 {
-                    eventPointerBlob = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate);
+                    eventPointerBlob = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate, false);
                     
                     var blobMappingEntity = EntityManager.CreateEntity();
                     EntityManager.AddComponentData(blobMappingEntity, new GameplayEventBlobMapping
@@ -176,3 +177,4 @@ namespace Waddle.GameplayBehaviour.Systems
         }
     }
 }
+#endif
