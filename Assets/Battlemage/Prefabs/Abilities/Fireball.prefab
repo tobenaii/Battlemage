@@ -207,11 +207,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ComponentOverrides:
-  - FullTypeName: Unity.Physics.PhysicsVelocity
-    EntityIndex: 0
-    PrefabType: -1
-    SendTypeOptimization: 2
-    VariantHash: 0
   - FullTypeName: Unity.Transforms.LocalTransform
     EntityIndex: 0
     PrefabType: -1
