@@ -18,7 +18,6 @@ namespace Waddle.GameplayBehaviour.Systems
         
         protected override void OnUpdate()
         {
-            Debug.Log("Crash Check Events");
             var eventInfos = SystemAPI.GetSingletonBuffer<GameplayEventInfoElement>();
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             foreach (var eventInfo in eventInfos)
