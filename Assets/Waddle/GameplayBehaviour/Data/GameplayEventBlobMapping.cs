@@ -1,10 +1,20 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 
 namespace Waddle.GameplayBehaviour.Data
 {
-    public struct GameplayEventBlobMapping : IComponentData
+    public struct InitializeGameplayEvents : IComponentData
     {
-        public Hash128 Hash;
-        public BlobAssetReference<EventPointer> Pointer;
+    }
+    
+    public struct GameplayEventInfoElement : IBufferElementData
+    {
+        public GameplayEventInfo Info;
+    }
+    
+    public struct GameplayEventInfo : IComponentData
+    {
+        public FixedString512Bytes AssemblyQualifiedName;
+        public FixedString64Bytes MethodName;
     }
 }

@@ -4,7 +4,6 @@ using System.Reflection;
 using Unity.Entities;
 using UnityEngine;
 using Waddle.GameplayBehaviour.Data;
-using Waddle.GameplayBehaviour.Utilities;
 using Hash128 = Unity.Entities.Hash128;
 
 namespace Waddle.GameplayBehaviour.Authoring
@@ -27,8 +26,8 @@ namespace Waddle.GameplayBehaviour.Authoring
 
                 var methods = gameplayBehaviour.GetType()
                     .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                var gameplayEventRefs = AddBuffer<GameplayEventReference>(entity);
-                foreach (var method in methods.Where(x => x.Name.Contains("$BurstManaged")))
+                var fullGameplayEventRefs = AddBuffer<FullGameplayEventReference>(entity);
+                foreach (var method in methods.Where(x => !x.Name.Contains("$BurstManaged")))
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
                     var delegateType = attribute.GameplayEventType.GetManagedType()
@@ -36,38 +35,35 @@ namespace Waddle.GameplayBehaviour.Authoring
                     var eventDelegate = Delegate.CreateDelegate(delegateType, method);
                     var componentType = attribute.GameplayEventType;
 
-                    AddGameplayEvent(entity, gameplayBehaviour, componentType, eventDelegate, gameplayEventRefs);
+                    AddGameplayEvent(entity, gameplayBehaviour.GetType(), componentType, eventDelegate, fullGameplayEventRefs);
                 }
             }
 
-            private void AddGameplayEvent(Entity entity, GameplayBehaviourAuthoring gameplayBehaviour,
+            private void AddGameplayEvent(Entity entity, Type behaviourType,
                 ComponentType componentType, Delegate eventDelegate,
-                DynamicBuffer<GameplayEventReference> gameplayEventRefs)
+                DynamicBuffer<FullGameplayEventReference> fullGameplayEventRefs)
             {
-                var hash = GameplayBehaviourUtilities.GetEventHash(componentType);
-                if (!TryGetBlobAssetReference<EventPointer>(hash, out var result))
+                var eventInfoEntity = CreateAdditionalEntity(TransformUsageFlags.None, true);
+                AddComponent(eventInfoEntity, new GameplayEventInfo
                 {
-                    result = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate, true);
-                    var blobMappingEntity = CreateAdditionalEntity(TransformUsageFlags.None);
-                    AddComponent(blobMappingEntity, new GameplayEventBlobMapping
-                    {
-                        Hash = GameplayBehaviourUtilities.GetEventHash(gameplayBehaviour.GetType(), componentType,
-                            eventDelegate.Method),
-                        Pointer = result
-                    });
-                    AddBlobAssetWithCustomHash(ref result, hash);
-                }
+                    AssemblyQualifiedName = behaviourType.AssemblyQualifiedName,
+                    MethodName = eventDelegate.Method.Name,
+                });
 
                 AddComponent(entity, componentType);
-                
-                var localHash = componentType.IsComponent
-                    ? GameplayBehaviourUtilities.GetEventHash(componentType)
-                    : GameplayBehaviourUtilities.GetEventHash(componentType, eventDelegate.Method);
 
-                gameplayEventRefs.Add(new GameplayEventReference()
+                var typeHash = TypeManager.GetTypeInfo(componentType.TypeIndex).StableTypeHash;
+                var methodHash = componentType.IsBuffer ? eventDelegate.Method.Name.GetHashCode() : 0;
+                
+                var fullHash = new Hash128(
+                    (uint)behaviourType.AssemblyQualifiedName!.GetHashCode(),
+                    (uint)eventDelegate.Method.Name.GetHashCode(), 0, 0);
+
+                fullGameplayEventRefs.Add(new FullGameplayEventReference()
                 {
-                    Hash = localHash,
-                    EventPointerRef = result
+                    TypeHash = typeHash,
+                    MethodHash = methodHash,
+                    FullHash = fullHash
                 });
             }
         }

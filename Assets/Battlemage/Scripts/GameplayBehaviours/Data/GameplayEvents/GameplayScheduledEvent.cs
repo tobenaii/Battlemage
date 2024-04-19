@@ -7,7 +7,8 @@ namespace Battlemage.GameplayBehaviours.Data.GameplayEvents
     public struct GameplayScheduledEvent : IBufferElementData
     {
         public delegate void Delegate(ref GameplayState gameplayState, ref Entity source);
-        public Hash128 EventHash;
+        public ulong TypeHash;
+        public int MethodHash;
         public float Time;
     }
 }

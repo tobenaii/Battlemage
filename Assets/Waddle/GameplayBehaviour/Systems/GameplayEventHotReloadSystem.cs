@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.NetCode;
 using UnityEditor;
 using UnityEngine;
 using Waddle.GameplayBehaviour.Authoring;
@@ -19,7 +20,7 @@ using Hash128 = Unity.Entities.Hash128;
 
 namespace Waddle.GameplayBehaviour.Systems
 {
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial class GameplayEventHotReloadSystem : SystemBase
     {
         private FileSystemWatcher _watcher;
@@ -62,22 +63,12 @@ namespace Waddle.GameplayBehaviour.Systems
                 var attribute = methodInfo.GetCustomAttribute<GameplayEventAttribute>();
                 var delegateType = attribute.GameplayEventType.GetManagedType().GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
                 var eventHash = GameplayBehaviourUtilities.GetEventHash(monoScript.GetClass(), attribute.GameplayEventType, methodInfo);
-                var eventPointerBlob = GameplayBehaviourUtilities.FindEventPointerByHash(EntityManager, eventHash);
                 var eventDelegate = Delegate.CreateDelegate(delegateType, methodInfo);
                 availableEvents.Add((attribute.GameplayEventType, eventHash, eventDelegate));
-                if (!eventPointerBlob.IsCreated)
-                {
-                    eventPointerBlob = GameplayBehaviourUtilities.CreateEventPointerBlob(eventDelegate, false);
-                    
-                    var blobMappingEntity = EntityManager.CreateEntity();
-                    EntityManager.AddComponentData(blobMappingEntity, new GameplayEventBlobMapping
-                    {
-                        Hash = eventHash,
-                        Pointer = eventPointerBlob
-                    });
-                }
                 var newPointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
-                eventPointerBlob.Value.Pointer = newPointer;
+                
+                var eventIndex = GameplayBehaviourUtilities.GetEventPointerIndex(EntityManager, monoScript.GetClass(), methodInfo);
+                GameplayBehaviourUtilities.SetEventPointerByIndex(EntityManager, eventIndex, newPointer);
             }
             
             var addedEvents = availableEvents
@@ -120,7 +111,7 @@ namespace Waddle.GameplayBehaviour.Systems
             ecb.Playback(EntityManager);
             ecb.Dispose();
             _methodInfos[monoHash] = methodInfos;
-            Debug.Log($"Reloaded gameplay events: {monoScript.name}");
+            Debug.Log($"Reloaded {(World.IsServer() ? "server" : "client")} gameplay events: {monoScript.name}");
         }
         
         private static IEnumerable<MethodInfo> CompileEvents(MonoScript script)

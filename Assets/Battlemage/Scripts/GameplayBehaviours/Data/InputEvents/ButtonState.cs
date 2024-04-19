@@ -1,15 +1,12 @@
-﻿using System.Runtime.InteropServices;
+﻿using Waddle.Utilities;
 
 namespace Battlemage.GameplayBehaviours.Data.InputEvents
 {
     public struct ButtonState
     {
-        [MarshalAs(UnmanagedType.U1)]
-        public bool WasPressed;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool WasReleased;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool IsDown;
+        public BlittableBool WasPressed;
+        public BlittableBool WasReleased;
+        public BlittableBool IsDown;
 
         public void Pressed()
         {

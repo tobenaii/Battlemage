@@ -1,7 +1,9 @@
 #if UNITY_EDITOR
 using ParrelSync;
 #endif
+using Unity.Entities;
 using Unity.NetCode;
+using UnityEngine;
 
 // Create a custom bootstrap, which enables auto-connect.
 // The bootstrap can also be used to configure other settings as well as to
@@ -14,6 +16,8 @@ namespace Battlemage.Game.Systems
         public override bool Initialize(string defaultWorldName)
         {
             AutoConnectPort = 7979; // Enabled auto connect
+            
+            TypeManager.Initialize();
             
 #if UNITY_EDITOR
             if (!ClonesManager.IsClone())

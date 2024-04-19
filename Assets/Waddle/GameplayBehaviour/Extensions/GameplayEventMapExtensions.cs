@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Entities;
 using Waddle.GameplayBehaviour.Data;
 
@@ -6,16 +7,16 @@ namespace Waddle.GameplayBehaviour.Extensions
 {
     public static class GameplayEventReferenceExtensions
     {
-        public static IntPtr GetEventPointer(this DynamicBuffer<GameplayEventReference> buffer, Hash128 hash)
+        public static IntPtr GetEventPointer(this DynamicBuffer<GameplayEventReference> buffer, DynamicBuffer<GameplayEventPointer> pointers, ulong typeHash, int methodHash = 0)
         {
             foreach (var element in buffer)
             {
-                if (element.Hash == hash)
+                if (element.TypeHash == typeHash && element.MethodHash == methodHash)
                 {
-                    return element.EventPointerRef.Value.Pointer;
+                    return new IntPtr(pointers[element.Index].Pointer);
                 }
             }
-            return IntPtr.Zero;
+            throw new KeyNotFoundException($"Couldn't find event pointer for hash: {typeHash}-{methodHash}");
         }
     }
 }

@@ -12,10 +12,16 @@ namespace Battlemage.GameplayBehaviours.Systems
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayScheduledEventSystem : ISystem
     {
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<GameplayEventPointer>();
+        }
+
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
 
             foreach (var (scheduledEvents, eventMaps, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayScheduledEvent>, DynamicBuffer<GameplayEventReference>>()
@@ -28,7 +34,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                     {
                         var gameplayState = new GameplayState(state.EntityManager, ref ecb);
                         var source = entity;
-                        var pointer = eventMaps.GetEventPointer(scheduledEvent.EventHash);
+                        var pointer = eventMaps.GetEventPointer(eventPointers, scheduledEvent.TypeHash, scheduledEvent.MethodHash);
                         new FunctionPointer<GameplayScheduledEvent.Delegate>(pointer).Invoke(ref gameplayState, ref source);
                         scheduledEvents.RemoveAt(i);
                         i--;

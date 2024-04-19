@@ -1,77 +1,51 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using BovineLabs.Core.Extensions;
-using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 using Waddle.GameplayBehaviour.Data;
+using Hash128 = Unity.Entities.Hash128;
 
 namespace Waddle.GameplayBehaviour.Utilities
 {
     public static class GameplayBehaviourUtilities
     {
-        public static BlobAssetReference<EventPointer> FindEventPointerByHash(EntityManager entityManager, Hash128 hash)
+        public static int GetEventPointerIndex(EntityManager entityManager, Type behaviourType,
+            MethodInfo method)
         {
-            var entities = entityManager.CreateEntityQuery(ComponentType.ReadOnly<GameplayEventBlobMapping>())
-                .ToEntityArray(Allocator.Temp);
-            var blobMappings = entityManager.GetComponentLookup<GameplayEventBlobMapping>();
-            BlobAssetReference<EventPointer> eventPointerReference = default;
-            foreach (var entity in entities)
+            var eventInfos = entityManager.GetSingletonBuffer<GameplayEventInfoElement>();
+
+            for (var i = 0; i < eventInfos.Length; i++)
             {
-                var blobMapping = blobMappings[entity];
-                if (blobMapping.Hash == hash)
+                var eventInfo = eventInfos[i];
+                if (eventInfo.Info.AssemblyQualifiedName.ToString() == behaviourType.AssemblyQualifiedName &&
+                    eventInfo.Info.MethodName.ToString() == method.Name)
                 {
-                    eventPointerReference = blobMapping.Pointer;
-                    break;
+                    return i;
                 }
             }
 
-            entities.Dispose();
-            return eventPointerReference;
+            return -1;
         }
         
-        public static Hash128 GetEventHash(ComponentType eventType)
+        public static void SetEventPointerByIndex(EntityManager entityManager, int index, IntPtr pointer)
         {
-            return new Hash128(
-                (uint)eventType.TypeIndex.GetHashCode(), 0, 0, 0);
+            var eventPointers = entityManager.GetSingletonBuffer<GameplayEventPointer>();
+            eventPointers[index] = new GameplayEventPointer { Pointer = pointer.ToInt64() };
         }
-        
-        public static Hash128 GetEventHash(ComponentType eventType, MethodInfo method)
-        {
-            return new Hash128(
-                (uint)eventType.TypeIndex.GetHashCode(), 
-                (uint)GetCleanMethodName(method).GetHashCode(), 0, 0);
-        }
-        
+
         public static Hash128 GetEventHash(Type gameplayBehaviour, ComponentType eventType, MethodInfo method)
         {
+            var typeHash = TypeManager.GetTypeInfo(eventType.TypeIndex).StableTypeHash;
             return new Hash128(
                 (uint)gameplayBehaviour.GetHashCode(),
-                (uint)eventType.TypeIndex.GetHashCode(),
+                (uint)typeHash.GetHashCode(),
                 (uint)GetCleanMethodName(method).GetHashCode(), 0);
         }
 
         private static string GetCleanMethodName(MethodInfo method)
         {
             return method.Name.Replace("$BurstManaged", "");
-        }
-
-        public static BlobAssetReference<EventPointer> CreateEventPointerBlob(Delegate eventDelegate, bool burstCompiled)
-        {
-            var builder = new BlobBuilder(Allocator.Temp);
-            ref var eventPointer = ref builder.ConstructRoot<EventPointer>();
-            if (burstCompiled)
-            {
-                eventPointer.Pointer = BurstCompiler.CompileFunctionPointer(eventDelegate).Value;
-            }
-            else
-            {
-                eventPointer.Pointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
-            }
-            var result = builder.CreateBlobAssetReference<EventPointer>(Allocator.Persistent);
-            builder.Dispose();
-            return result;
         }
     }
 }
