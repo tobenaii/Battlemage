@@ -38,7 +38,6 @@ namespace Waddle.GameplayBehaviour.Systems
 #if !UNITY_EDITOR
             EntityManager.RemoveComponent<GameplayEventInfoElement>(SystemAPI.GetSingletonEntity<GameplayEventInfoElement>());
 #endif
-            Debug.Log("Crash Check Events End");
         }
     }
 }

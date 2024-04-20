@@ -1,5 +1,6 @@
 using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -60,12 +61,12 @@ namespace Battlemage.GameplayBehaviours.Data
             attributeMap[(byte)BattlemageAttribute.Health] = health;
         }
 
-        public void ScheduleEvent(Entity entity, float time, GameplayScheduledEvent.Delegate scheduledEventDelegate)
+        public void ScheduleEvent(Entity entity, float time, FixedString64Bytes scheduledEvent)
         {
             _entityManager.GetBuffer<GameplayScheduledEvent>(entity).Add(new GameplayScheduledEvent()
             {
                 TypeHash = TypeManager.GetTypeInfo<GameplayScheduledEvent>().StableTypeHash,
-                MethodHash = scheduledEventDelegate.Method.Name.GetHashCode(),
+                MethodHash = scheduledEvent.GetHashCode(),
                 Time = time,
             });
         }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using Waddle.GameplayBehaviour.Data;
@@ -25,7 +28,8 @@ namespace Waddle.GameplayBehaviour.Authoring
                 });
 
                 var methods = gameplayBehaviour.GetType()
-                    .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                    .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null);
                 var fullGameplayEventRefs = AddBuffer<FullGameplayEventReference>(entity);
                 foreach (var method in methods.Where(x => !x.Name.Contains("$BurstManaged")))
                 {
@@ -53,7 +57,7 @@ namespace Waddle.GameplayBehaviour.Authoring
                 AddComponent(entity, componentType);
 
                 var typeHash = TypeManager.GetTypeInfo(componentType.TypeIndex).StableTypeHash;
-                var methodHash = componentType.IsBuffer ? eventDelegate.Method.Name.GetHashCode() : 0;
+                var methodHash = componentType.IsBuffer ? new FixedString64Bytes(eventDelegate.Method.Name).GetHashCode() : 0;
                 
                 var fullHash = new Hash128(
                     (uint)behaviourType.AssemblyQualifiedName!.GetHashCode(),
