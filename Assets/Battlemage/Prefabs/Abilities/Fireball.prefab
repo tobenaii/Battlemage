@@ -207,8 +207,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ComponentOverrides:
+  - FullTypeName: Battlemage.SimpleVelocity.Data.Velocity
+    EntityIndex: 0
+    PrefabType: -1
+    SendTypeOptimization: 2
+    VariantHash: 0
   - FullTypeName: Unity.Transforms.LocalTransform
     EntityIndex: 0
     PrefabType: -1
-    SendTypeOptimization: -1
-    VariantHash: 18225908329647095764
+    SendTypeOptimization: 3
+    VariantHash: 17312028693704544116

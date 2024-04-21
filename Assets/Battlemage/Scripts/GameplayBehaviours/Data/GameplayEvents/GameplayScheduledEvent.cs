@@ -10,5 +10,6 @@ namespace Battlemage.GameplayBehaviours.Data.GameplayEvents
         public ulong TypeHash;
         public int MethodHash;
         public float Time;
+        public double TimeStarted;
     }
 }

@@ -3,10 +3,12 @@ using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
 using Waddle.GameplayBehaviour.Data;
 using Waddle.GameplayBehaviour.Extensions;
+using Waddle.GameplayBehaviour.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
@@ -39,20 +41,26 @@ namespace Battlemage.GameplayBehaviours.Systems
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
 
-            foreach (var (eventRefs, localTransform, entity) in
-                     SystemAPI.Query<DynamicBuffer<GameplayEventReference>, LocalTransform>()
-                         .WithAll<GameplayOnHitEvent>()
+            foreach (var (eventRefs, onHitEvents, localTransform, entity) in
+                     SystemAPI.Query<DynamicBuffer<GameplayEventReference>, DynamicBuffer<GameplayOnHitEvent>, LocalTransform>()
+                         .WithAll<Simulate>()
                          .WithEntityAccess())
             {
                 _hits.Clear();
-                if (collisionWorld.OverlapSphere(localTransform.Position, 1, ref _hits, CollisionFilter.Default))
+                foreach (var onHitEvent in onHitEvents)
                 {
-                    var ability = entity;
-                    var target = _hits[0].Entity;
-                    var gameplayState = new GameplayState(state.EntityManager, ref ecb);
-                    var pointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<GameplayOnHitEvent>().StableTypeHash);
-                    new FunctionPointer<GameplayOnHitEvent.Delegate>(pointer).Invoke(ref gameplayState, ref ability, ref target);
+                    if (collisionWorld.OverlapSphere(localTransform.Position, onHitEvent.Radius, ref _hits, CollisionFilter.Default))
+                    {
+                        foreach (var hit in _hits)
+                        {
+                            var self = entity;
+                            var target = hit.Entity;
+                            var pointer = eventRefs.GetEventPointer(eventPointers, onHitEvent.TypeHash, onHitEvent.MethodHash);
+                            new FunctionPointer<GameplayOnHitEvent.Delegate>(pointer).Invoke(ref gameplayState, ref self, ref target);
+                        }
+                    }
                 }
             }
             

@@ -1,6 +1,7 @@
 using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Unity.Collections;
+using Unity.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -14,11 +15,13 @@ namespace Battlemage.GameplayBehaviours.Data
     {
         private EntityManager _entityManager;
         private EntityCommandBuffer _ecb;
+        private readonly TimeData _time;
         
-        public GameplayState(EntityManager entityManager, ref EntityCommandBuffer ecb)
+        public GameplayState(EntityManager entityManager, EntityCommandBuffer ecb, TimeData time)
         {
             _entityManager = entityManager;
             _ecb = ecb;
+            _time = time;
         }
 
         public T GetComponent<T>(Entity entity) where T : unmanaged, IComponentData
@@ -29,6 +32,12 @@ namespace Battlemage.GameplayBehaviours.Data
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponentData
         {
             _entityManager.SetComponentData(entity, component);
+        }
+
+        public FixedString64Bytes GetEntityName(Entity entity)
+        {
+            _entityManager.GetName(entity, out var name);
+            return name;
         }
 
         public void TryActivateAbility(Entity entity, Entity abilityPrefab)
@@ -42,15 +51,7 @@ namespace Battlemage.GameplayBehaviours.Data
         
         public void MarkForDestroy(Entity entity)
         {
-            _ecb.DestroyEntity(entity);
-        }
-
-        public void SetVelocity(Entity entity, float3 velocity)
-        {
-            _entityManager.SetComponentData(entity, new Velocity.Data.Velocity()
-            {
-                Value = velocity,
-            });
+            _ecb.SetEnabled(entity, false);
         }
 
         public void DealDamage(Entity source, float amount, Entity target)
@@ -68,6 +69,17 @@ namespace Battlemage.GameplayBehaviours.Data
                 TypeHash = TypeManager.GetTypeInfo<GameplayScheduledEvent>().StableTypeHash,
                 MethodHash = scheduledEvent.GetHashCode(),
                 Time = time,
+                TimeStarted = _time.ElapsedTime
+            });
+        }
+        
+        public void AddOverlapSphereCallback(Entity entity, float radius, FixedString64Bytes scheduledEvent)
+        {
+            _entityManager.GetBuffer<GameplayOnHitEvent>(entity).Add(new GameplayOnHitEvent()
+            {
+                TypeHash = TypeManager.GetTypeInfo<GameplayOnHitEvent>().StableTypeHash,
+                MethodHash = scheduledEvent.GetHashCode(),
+                Radius = radius
             });
         }
 

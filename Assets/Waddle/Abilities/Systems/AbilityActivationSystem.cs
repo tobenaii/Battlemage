@@ -7,7 +7,7 @@ using Waddle.Attributes.Extensions;
 
 namespace Waddle.Abilities.Systems
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderLast = true)]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct AbilityActivationSystem : ISystem
     {

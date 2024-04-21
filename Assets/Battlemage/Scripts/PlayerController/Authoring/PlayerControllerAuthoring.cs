@@ -43,6 +43,7 @@ namespace Battlemage.PlayerController.Authoring
             var characterForward = state.GetForward(character);
             var characterRight = state.GetRight(character);
             var moveVector = (value.y * characterForward) + (value.x * characterRight);
+            
             moveVector = MathUtilities.ClampToMaxLength(moveVector, 1f);
             characterCommands.MoveVector = moveVector;
             

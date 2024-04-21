@@ -26,11 +26,18 @@ namespace Battlemage.Game.Systems
                 var serverWorld = CreateServerWorld("Server World");
                 var tickRate = new ClientServerTickRate();
                 tickRate.ResolveDefaults();
+#if UNITY_EDITOR
                 tickRate.SimulationTickRate = 60;
                 tickRate.NetworkTickRate = 30;
                 tickRate.MaxSimulationStepsPerFrame = 3;
                 tickRate.PredictedFixedStepSimulationTickRatio = 1;
                 serverWorld.EntityManager.CreateSingleton(tickRate);
+#else 
+                tickRate.SimulationTickRate = 60;
+                tickRate.NetworkTickRate = 60;
+                tickRate.MaxSimulationStepsPerFrame = 3;
+                tickRate.PredictedFixedStepSimulationTickRatio = 1;
+#endif
 #if UNITY_EDITOR
             }
 #endif

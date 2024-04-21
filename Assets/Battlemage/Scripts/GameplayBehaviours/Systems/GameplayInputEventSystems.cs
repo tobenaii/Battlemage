@@ -26,21 +26,21 @@ namespace Battlemage.GameplayBehaviours.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
-
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            
             foreach (var (eventRefs, inputs, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>>()
                          .WithAll<GhostOwnerIsLocal, Simulate>()
-                         .WithAny<InputJumpEvent, InputMoveEvent>()
+                         .WithAny<InputLookEvent, InputPrimaryAbilityEvent>()
                          .WithEntityAccess())
             {
                 var source = entity;
-                var gameplayState = new GameplayState(state.EntityManager, ref ecb);
                 if (SystemAPI.HasComponent<InputLookEvent>(entity))
                 {
                     var lookDelta = inputs.ValueRO.LookInputDelta;
                     var lookPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputLookEvent>().StableTypeHash);
+                    var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
                     new FunctionPointer<InputLookEvent.Delegate>(lookPointer).Invoke(ref gameplayState, ref source, ref lookDelta);
                 }
 
@@ -48,10 +48,11 @@ namespace Battlemage.GameplayBehaviours.Systems
                 {
                     var primaryAbilityInput = inputs.ValueRO.PrimaryAbility;
                     var primaryAbilityPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputPrimaryAbilityEvent>().StableTypeHash);
+                    var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
                     new FunctionPointer<InputPrimaryAbilityEvent.Delegate>(primaryAbilityPointer).Invoke(ref gameplayState, ref source, ref primaryAbilityInput);
                 }
             }
-
+            
             ecb.Playback(state.EntityManager);
             ecb.Dispose();
         }
@@ -71,16 +72,16 @@ namespace Battlemage.GameplayBehaviours.Systems
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
 
             foreach (var (eventRefs, inputs, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>>()
                          .WithAll<GhostOwnerIsLocal, Simulate>()
-                         .WithAny<InputLookEvent, InputPrimaryAbilityEvent>()
+                         .WithAny<InputJumpEvent, InputMoveEvent>()
                          .WithEntityAccess())
             {
                 var source = entity;
-                var gameplayState = new GameplayState(state.EntityManager, ref ecb);
                 if (SystemAPI.HasComponent<InputJumpEvent>(entity))
                 {
                     var jumpPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputJumpEvent>().StableTypeHash);

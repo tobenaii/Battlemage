@@ -1,9 +1,10 @@
-﻿using Unity.Burst;
+﻿using Battlemage.SimpleVelocity.Data;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 
-namespace Battlemage.Velocity.Systems
+namespace Battlemage.SimpleVelocity.Systems
 {
     [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
@@ -24,7 +25,7 @@ namespace Battlemage.Velocity.Systems
         {
             public float DeltaTime;
             
-            private void Execute(in Data.Velocity velocity, ref LocalTransform localTransform)
+            private void Execute(in Velocity velocity, ref LocalTransform localTransform)
             {
                 localTransform.Position += velocity.Value * DeltaTime;
             }
