@@ -9,12 +9,13 @@ using Unity.Physics;
 using Unity.Transforms;
 using Waddle.FirstPersonCharacter.Data;
 using Waddle.FirstPersonCharacter.Utilities;
+using Waddle.GameplayBehaviour.Systems;
 using CharacterAspect = Waddle.FirstPersonCharacter.Data.CharacterAspect;
 
 namespace Waddle.FirstPersonCharacter.Systems
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderFirst = true)]
-    [UpdateBefore(typeof(PredictedFixedStepSimulationSystemGroup))]
+    [UpdateBefore(typeof(GameplayEventsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     [BurstCompile]
     public partial struct BuildCharacterPredictedRotationSystem : ISystem
@@ -160,7 +161,7 @@ namespace Waddle.FirstPersonCharacter.Systems
     }
 
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [UpdateAfter(typeof(PredictedFixedStepSimulationSystemGroup))]
+    [UpdateAfter(typeof(GameplayEventsSystemGroup))]
     [UpdateAfter(typeof(BuildCharacterPredictedRotationSystem))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     [BurstCompile]

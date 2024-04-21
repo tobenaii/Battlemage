@@ -2,9 +2,10 @@
 
 namespace Waddle.GameplayEffect.Data
 {
-    public struct GameplayEffect
+    public struct GameplayEffect : IBufferElementData
     {
-        public BlobArray<AttributeModifier> AttributeModifiers;
+        public int AttributeModifiers;
+        public int GameplayTags;
     }
 
     public struct AttributeModifier

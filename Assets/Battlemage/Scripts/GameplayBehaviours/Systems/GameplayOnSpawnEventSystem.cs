@@ -4,14 +4,15 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
+using Waddle.GameplayActions.Systems;
 using Waddle.GameplayBehaviour.Data;
 using Waddle.GameplayBehaviour.Extensions;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
     [BurstCompile]
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderLast = true)]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateAfter(typeof(GameplayActionRequestsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayOnSpawnEventSystem : ISystem
     {

@@ -5,16 +5,14 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using Waddle.FirstPersonCharacter.Systems;
 using Waddle.GameplayBehaviour.Data;
 using Waddle.GameplayBehaviour.Extensions;
+using Waddle.GameplayBehaviour.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
     [BurstCompile]
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderFirst = true)]
-    [UpdateBefore(typeof(FirstPersonCharacterVariableUpdateSystem))]
-    [UpdateAfter(typeof(BuildCharacterPredictedRotationSystem))]
+    [UpdateInGroup(typeof(GameplayEventsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayVariableInputEventSystem : ISystem
     {

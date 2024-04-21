@@ -12,6 +12,7 @@ using Waddle.GameplayBehaviour.Systems;
 namespace Battlemage.GameplayBehaviours.Systems
 {
     [BurstCompile]
+    [UpdateInGroup(typeof(GameplayEventsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayScheduledEventSystem : ISystem
     {

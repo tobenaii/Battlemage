@@ -13,7 +13,8 @@ using Waddle.GameplayBehaviour.Systems;
 namespace Battlemage.GameplayBehaviours.Systems
 {
     [BurstCompile]
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateInGroup(typeof(GameplayEventsSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayOnHitEventSystem : ISystem
     {
         private NativeList<DistanceHit> _hits;

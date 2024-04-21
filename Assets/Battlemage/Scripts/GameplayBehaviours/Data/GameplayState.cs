@@ -8,6 +8,7 @@ using Unity.Transforms;
 using Waddle.Abilities.Data;
 using Waddle.Attributes.Data;
 using Waddle.Attributes.Extensions;
+using Waddle.GameplayActions.Data;
 using Waddle.Utilities;
 
 namespace Battlemage.GameplayBehaviours.Data
@@ -45,10 +46,26 @@ namespace Battlemage.GameplayBehaviours.Data
 
         public void TryActivateAbility(Entity entity, Entity abilityPrefab)
         {
-            var requests = _entityManager.GetBuffer<AbilityActivateRequest>(entity);
-            requests.Add(new AbilityActivateRequest()
+            var abilityRequirements =
+                _entityManager.GetBuffer<AbilityActivationAttributeRequirement>(abilityPrefab);
+            var requirements = _entityManager.GetBuffer<GameplayActionRequirement>(entity);
+            var requests = _entityManager.GetBuffer<ActivateAbilityRequest>(entity);
+            var requirementIndices = 0;
+            
+            foreach (var abilityRequirement in abilityRequirements)
             {
-                AbilityPrefab = abilityPrefab
+                requirements.Add(new GameplayActionRequirement()
+                {
+                    Attribute = abilityRequirement.Attribute,
+                    Amount = abilityRequirement.Amount
+                });
+            
+                requirementIndices |= (1 << requirements.Length - 1);
+            }
+            requests.Add(new ActivateAbilityRequest()
+            {
+                AbilityPrefab = abilityPrefab,
+                RequirementIndices = requirementIndices
             });
         }
         

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using Waddle.GameplayActions.Data;
 using Waddle.GameplayBehaviour.Data;
 using Hash128 = Unity.Entities.Hash128;
 
@@ -41,6 +40,8 @@ namespace Waddle.GameplayBehaviour.Authoring
 
                     AddGameplayEvent(entity, gameplayBehaviour.GetType(), componentType, eventDelegate, fullGameplayEventRefs);
                 }
+
+                AddBuffer<GameplayActionRequirement>(entity);
             }
 
             private void AddGameplayEvent(Entity entity, Type behaviourType,

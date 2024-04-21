@@ -2,14 +2,14 @@
 using Unity.Entities;
 using Unity.NetCode;
 using Waddle.Abilities.Data;
-using Waddle.Attributes.Data;
-using Waddle.Attributes.Extensions;
+using Waddle.GameplayActions.Data;
+using Waddle.GameplayActions.Systems;
 
 namespace Waddle.Abilities.Systems
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(GameplayActionRequestsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
-    public partial struct AbilityActivationSystem : ISystem
+    public partial struct AbilityActivationRequestSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
         {
@@ -20,28 +20,15 @@ namespace Waddle.Abilities.Systems
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
-            foreach (var (abilityActivateRequests, attributes, ghostOwner, entity) in SystemAPI
-                         .Query<DynamicBuffer<AbilityActivateRequest>, DynamicBuffer<AttributeMap>, RefRO<GhostOwner>>()
+            foreach (var (abilityActivateRequests, requirementResult, ghostOwner, entity) in SystemAPI
+                         .Query<DynamicBuffer<ActivateAbilityRequest>, RefRO<GameplayActionRequirementResult>, RefRO<GhostOwner>>()
                          .WithAll<Simulate>()
                          .WithEntityAccess()
-                         .WithChangeFilter<AbilityActivateRequest>())
+                         .WithChangeFilter<ActivateAbilityRequest>())
             {
-                var attributeMap = attributes.AsMap();
                 foreach (var request in abilityActivateRequests)
                 {
-                    var attributeRequirements =
-                        SystemAPI.GetBuffer<AbilityActivationAttributeRequirement>(request.AbilityPrefab);
-                    bool succeeded = true;
-                    foreach (var requirement in attributeRequirements)
-                    {
-                        var value = attributeMap[requirement.Attribute];
-                        if (value.CurrentValue < requirement.Amount)
-                        {
-                            succeeded = false;
-                            break;
-                        }
-                    }
-
+                    var succeeded = requirementResult.ValueRO.HasSucceeded(request.RequirementIndices);
                     if (succeeded && networkTime.IsFirstTimeFullyPredictingTick)
                     {
                         var ability = ecb.Instantiate(request.AbilityPrefab);

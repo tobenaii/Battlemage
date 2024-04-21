@@ -28,13 +28,14 @@ namespace Battlemage.Abilities.Authoring
             
             playerTransform.Position += playerTransform.Up() * 1.25f;
             playerTransform.Rotation = math.mul(playerTransform.Rotation, viewTransform.Rotation);
+            playerTransform.Position += playerTransform.Forward();
             state.SetComponent(self, playerTransform);
 
             var velocity = new Velocity() { Value = playerTransform.Forward() * 20.0f };
             state.SetComponent(self, velocity);
             
             state.ScheduleEvent(self, 10.0f, nameof(DoExplode));
-            //state.AddOverlapSphereCallback(self, 0.25f, nameof(OnHit));
+            state.AddOverlapSphereCallback(self, 0.25f, nameof(OnHit));
         }
         
         [GameplayEvent(typeof(GameplayOnHitEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(GameplayOnHitEvent.Delegate))]
@@ -42,7 +43,6 @@ namespace Battlemage.Abilities.Authoring
         {
             var abilityData = state.GetComponent<AbilityData>(self);
             if (target == abilityData.Source) return;
-            Debug.Log(state.GetEntityName(target));
             DoExplode(ref state, ref self);
         }
         
