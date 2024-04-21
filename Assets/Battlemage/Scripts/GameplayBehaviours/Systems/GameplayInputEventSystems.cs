@@ -28,7 +28,8 @@ namespace Battlemage.GameplayBehaviours.Systems
         {
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-            
+            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
+
             foreach (var (eventRefs, inputs, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>>()
                          .WithAll<GhostOwnerIsLocal, Simulate>()
@@ -40,7 +41,6 @@ namespace Battlemage.GameplayBehaviours.Systems
                 {
                     var lookDelta = inputs.ValueRO.LookInputDelta;
                     var lookPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputLookEvent>().StableTypeHash);
-                    var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
                     new FunctionPointer<InputLookEvent.Delegate>(lookPointer).Invoke(ref gameplayState, ref source, ref lookDelta);
                 }
 
@@ -48,7 +48,6 @@ namespace Battlemage.GameplayBehaviours.Systems
                 {
                     var primaryAbilityInput = inputs.ValueRO.PrimaryAbility;
                     var primaryAbilityPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputPrimaryAbilityEvent>().StableTypeHash);
-                    var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
                     new FunctionPointer<InputPrimaryAbilityEvent.Delegate>(primaryAbilityPointer).Invoke(ref gameplayState, ref source, ref primaryAbilityInput);
                 }
             }
@@ -72,7 +71,7 @@ namespace Battlemage.GameplayBehaviours.Systems
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
+            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
 
             foreach (var (eventRefs, inputs, entity) in SystemAPI

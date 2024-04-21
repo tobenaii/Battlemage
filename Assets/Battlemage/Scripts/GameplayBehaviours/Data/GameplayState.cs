@@ -8,6 +8,7 @@ using Unity.Transforms;
 using Waddle.Abilities.Data;
 using Waddle.Attributes.Data;
 using Waddle.Attributes.Extensions;
+using Waddle.Utilities;
 
 namespace Battlemage.GameplayBehaviours.Data
 {
@@ -16,12 +17,14 @@ namespace Battlemage.GameplayBehaviours.Data
         private EntityManager _entityManager;
         private EntityCommandBuffer _ecb;
         private readonly TimeData _time;
+        private readonly BlittableBool _isServer;
         
-        public GameplayState(EntityManager entityManager, EntityCommandBuffer ecb, TimeData time)
+        public GameplayState(EntityManager entityManager, EntityCommandBuffer ecb, TimeData time, BlittableBool isServer)
         {
             _entityManager = entityManager;
             _ecb = ecb;
             _time = time;
+            _isServer = isServer;
         }
 
         public T GetComponent<T>(Entity entity) where T : unmanaged, IComponentData
@@ -51,7 +54,10 @@ namespace Battlemage.GameplayBehaviours.Data
         
         public void MarkForDestroy(Entity entity)
         {
-            _ecb.SetEnabled(entity, false);
+            if (_isServer)
+                _ecb.DestroyEntity(entity);
+            else
+                _ecb.SetEnabled(entity, false);
         }
 
         public void DealDamage(Entity source, float amount, Entity target)

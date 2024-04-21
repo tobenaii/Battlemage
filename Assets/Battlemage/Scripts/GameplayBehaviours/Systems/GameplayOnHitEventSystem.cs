@@ -41,7 +41,7 @@ namespace Battlemage.GameplayBehaviours.Systems
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
+            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
 
             foreach (var (eventRefs, onHitEvents, localTransform, entity) in
                      SystemAPI.Query<DynamicBuffer<GameplayEventReference>, DynamicBuffer<GameplayOnHitEvent>, LocalTransform>()

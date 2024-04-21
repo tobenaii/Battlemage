@@ -27,7 +27,7 @@ namespace Battlemage.GameplayBehaviours.Systems
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
-            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time);
+            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
 
             if (!networkTime.IsFirstTimeFullyPredictingTick) return;
 
