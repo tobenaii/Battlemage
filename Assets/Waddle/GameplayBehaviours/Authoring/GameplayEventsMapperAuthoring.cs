@@ -1,8 +1,8 @@
 ﻿using Unity.Entities;
 using UnityEngine;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 
-namespace Waddle.GameplayBehaviour.Authoring
+namespace Waddle.GameplayBehaviours.Authoring
 {
     public class GameplayEventsMapperAuthoring : MonoBehaviour
     {

@@ -17,7 +17,7 @@ namespace Battlemage.Attributes.Authoring
             [HorizontalGroup, HideLabel]
             public BattlemageAttribute Attribute;
             [HorizontalGroup, HideLabel]
-            public AttributeBindingObject Binding;
+            public GameplayAttributeBindingObject Binding;
         }
         
         [SerializeField] private List<AttributeBindingMap> _attributeBindings;

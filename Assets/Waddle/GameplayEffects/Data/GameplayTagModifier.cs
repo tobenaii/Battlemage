@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace Waddle.GameplayEffect.Data
+namespace Waddle.GameplayEffects.Data
 {
     public struct GameplayTagModifier : IBufferElementData
     {

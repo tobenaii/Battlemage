@@ -6,12 +6,11 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using UnityEngine.Scripting;
 using Waddle.Abilities.Data;
 using Waddle.FirstPersonCharacter.Data;
-using Waddle.GameplayBehaviour.Authoring;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Authoring;
+using Waddle.GameplayBehaviours.Data;
 
 namespace Battlemage.Abilities.Authoring
 {

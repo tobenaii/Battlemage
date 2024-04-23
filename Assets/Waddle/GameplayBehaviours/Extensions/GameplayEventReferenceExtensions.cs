@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Unity.Entities;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 
-namespace Waddle.GameplayBehaviour.Extensions
+namespace Waddle.GameplayBehaviours.Extensions
 {
     public static class GameplayEventReferenceExtensions
     {

@@ -9,7 +9,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using Waddle.FirstPersonCharacter.Data;
 using Waddle.FirstPersonCharacter.Utilities;
-using Waddle.GameplayBehaviour.Systems;
+using Waddle.GameplayBehaviours.Systems;
 using CharacterAspect = Waddle.FirstPersonCharacter.Data.CharacterAspect;
 
 namespace Waddle.FirstPersonCharacter.Systems

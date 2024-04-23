@@ -3,7 +3,7 @@ using System.Reflection;
 using BovineLabs.Core.Extensions;
 using Unity.Entities;
 using UnityEngine;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 using Hash128 = Unity.Entities.Hash128;
 
 namespace Waddle.GameplayBehaviour.Utilities

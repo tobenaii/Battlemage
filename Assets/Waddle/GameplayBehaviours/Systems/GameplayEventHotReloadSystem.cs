@@ -13,12 +13,12 @@ using Unity.Entities;
 using Unity.NetCode;
 using UnityEditor;
 using UnityEngine;
-using Waddle.GameplayBehaviour.Authoring;
-using Waddle.GameplayBehaviour.Data;
 using Waddle.GameplayBehaviour.Utilities;
+using Waddle.GameplayBehaviours.Authoring;
+using Waddle.GameplayBehaviours.Data;
 using Hash128 = Unity.Entities.Hash128;
 
-namespace Waddle.GameplayBehaviour.Systems
+namespace Waddle.GameplayBehaviours.Systems
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial class GameplayEventHotReloadSystem : SystemBase

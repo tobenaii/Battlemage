@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 using Hash128 = Unity.Entities.Hash128;
 
-namespace Waddle.GameplayBehaviour.Authoring
+namespace Waddle.GameplayBehaviours.Authoring
 {
     [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
     public partial class GameplayEventsBakingSystem : SystemBase

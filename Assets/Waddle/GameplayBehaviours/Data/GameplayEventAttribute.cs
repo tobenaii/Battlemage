@@ -2,7 +2,7 @@
 using Unity.Burst;
 using Unity.Entities;
 
-namespace Waddle.GameplayBehaviour.Data
+namespace Waddle.GameplayBehaviours.Data
 {
     [AttributeUsage(AttributeTargets.Struct)]
     public class GameplayEventDefinitionAttribute : BurstCompileAttribute

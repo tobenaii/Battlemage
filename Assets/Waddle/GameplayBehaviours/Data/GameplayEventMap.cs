@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace Waddle.GameplayBehaviour.Data
+namespace Waddle.GameplayBehaviours.Data
 {
     [InternalBufferCapacity(0)]
     public struct GameplayEventReference : IBufferElementData

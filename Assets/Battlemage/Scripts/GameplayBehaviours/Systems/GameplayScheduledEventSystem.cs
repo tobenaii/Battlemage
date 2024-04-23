@@ -5,9 +5,9 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
-using Waddle.GameplayBehaviour.Data;
-using Waddle.GameplayBehaviour.Extensions;
-using Waddle.GameplayBehaviour.Systems;
+using Waddle.GameplayBehaviours.Data;
+using Waddle.GameplayBehaviours.Extensions;
+using Waddle.GameplayBehaviours.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {

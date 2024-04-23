@@ -1,7 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 
-namespace Waddle.GameplayBehaviour.Data
+namespace Waddle.GameplayBehaviours.Data
 {
     public struct InitializeGameplayEvents : IComponentData
     {

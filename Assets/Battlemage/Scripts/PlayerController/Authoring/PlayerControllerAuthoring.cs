@@ -9,8 +9,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Waddle.FirstPersonCharacter.Data;
-using Waddle.GameplayBehaviour.Authoring;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Authoring;
+using Waddle.GameplayBehaviours.Data;
 
 namespace Battlemage.PlayerController.Authoring
 {

@@ -1,5 +1,5 @@
 ﻿using Unity.Entities;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 
 namespace Battlemage.GameplayBehaviours.Data.GameplayEvents
 {

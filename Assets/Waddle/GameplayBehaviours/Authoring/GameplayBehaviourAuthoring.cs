@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Waddle.GameplayBehaviour.Authoring
+namespace Waddle.GameplayBehaviours.Authoring
 {
     [DisallowMultipleComponent, RequireComponent(typeof(GameplayEventsAuthoring)), ExecuteAlways]
     public abstract class GameplayBehaviourAuthoring : MonoBehaviour

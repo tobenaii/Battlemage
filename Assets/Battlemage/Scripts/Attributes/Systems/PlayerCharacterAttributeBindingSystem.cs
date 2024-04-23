@@ -8,7 +8,7 @@ namespace Battlemage.Attributes.Systems
     public struct PlayerCharacterAttributeBinding : IBufferElementData
     {
         public byte Attribute;
-        public UnityObjectRef<AttributeBindingObject> Binding;
+        public UnityObjectRef<GameplayAttributeBindingObject> Binding;
     }
     
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]

@@ -6,9 +6,9 @@ using Unity.Entities;
 using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
-using Waddle.GameplayBehaviour.Data;
-using Waddle.GameplayBehaviour.Extensions;
-using Waddle.GameplayBehaviour.Systems;
+using Waddle.GameplayBehaviours.Data;
+using Waddle.GameplayBehaviours.Extensions;
+using Waddle.GameplayBehaviours.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {

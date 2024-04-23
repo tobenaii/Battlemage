@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 
 namespace Battlemage.GameplayBehaviours.Data.InputEvents
 {

@@ -2,10 +2,9 @@
 using System.Reflection;
 using Unity.Burst;
 using Unity.Entities;
-using UnityEngine;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 
-namespace Waddle.GameplayBehaviour.Systems
+namespace Waddle.GameplayBehaviours.Systems
 {
     [UpdateInGroup(typeof(InitializationSystemGroup), OrderFirst = true)]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]

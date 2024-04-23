@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
-using Waddle.GameplayEffect.Data;
+using Waddle.GameplayEffects.Data;
 
-namespace Waddle.GameplayEffect.Systems
+namespace Waddle.GameplayEffects.Systems
 {
     public partial struct GameplayEffectRequestSystem : ISystem
     {
@@ -11,7 +11,7 @@ namespace Waddle.GameplayEffect.Systems
         {
             _effectPrefab = state.EntityManager.CreateEntity(
                 ComponentType.ReadWrite<Prefab>(),
-                ComponentType.ReadWrite<Data.GameplayEffect>(),
+                ComponentType.ReadWrite<GameplayEffects.Data.GameplayEffect>(),
                 ComponentType.ReadWrite<GameplayAttributeModifier>(), 
                 ComponentType.ReadWrite<GameplayTagModifier>());
         }

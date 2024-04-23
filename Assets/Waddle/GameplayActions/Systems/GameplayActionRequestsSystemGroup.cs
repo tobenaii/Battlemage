@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 using Unity.NetCode;
-using Waddle.GameplayBehaviour.Systems;
+using Waddle.GameplayBehaviours.Systems;
 
 namespace Waddle.GameplayActions.Systems
 {

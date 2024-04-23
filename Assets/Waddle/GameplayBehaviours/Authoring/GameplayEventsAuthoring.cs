@@ -5,10 +5,10 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using Waddle.GameplayActions.Data;
-using Waddle.GameplayBehaviour.Data;
+using Waddle.GameplayBehaviours.Data;
 using Hash128 = Unity.Entities.Hash128;
 
-namespace Waddle.GameplayBehaviour.Authoring
+namespace Waddle.GameplayBehaviours.Authoring
 {
     [DisallowMultipleComponent, RequireComponent(typeof(GameplayBehaviourAuthoring))]
     public class GameplayEventsAuthoring : MonoBehaviour
