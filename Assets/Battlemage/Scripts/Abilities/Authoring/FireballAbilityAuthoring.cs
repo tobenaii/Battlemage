@@ -15,7 +15,7 @@ using Waddle.GameplayBehaviours.Data;
 namespace Battlemage.Abilities.Authoring
 {
     [BurstCompile, Preserve]
-    public class FireballAbilityAuthoring : AbilityBehaviour<FireballAbilityAuthoring>
+    public class FireballAbilityAuthoring : AbilityBehaviour
     {
         protected override void Bake(Entity entity)
         {

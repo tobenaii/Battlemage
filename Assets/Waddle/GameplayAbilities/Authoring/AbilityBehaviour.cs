@@ -3,7 +3,7 @@ using Waddle.GameplayAbilities.Data;
 
 namespace Waddle.GameplayAbilities.Authoring
 {
-    public abstract class AbilityBehaviour<T> : GameplayBehaviours.Authoring.GameplayBehaviour where T : AbilityBehaviour<T>
+    public abstract class AbilityBehaviour : GameplayBehaviours.Authoring.GameplayBehaviour
     {
         protected override void Bake(Entity entity)
         {
