@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.Collections;
@@ -29,6 +30,7 @@ namespace Waddle.GameplayBehaviours.Authoring
                     .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null);
                 var fullGameplayEventRefs = AddBuffer<FullGameplayEventReference>(entity);
+                var addedComponents = new List<ComponentType>();
                 
                 foreach (var method in methods.Where(x => !x.Name.Contains("$BurstManaged")))
                 {
@@ -38,7 +40,7 @@ namespace Waddle.GameplayBehaviours.Authoring
                     var eventDelegate = Delegate.CreateDelegate(delegateType, method);
                     var componentType = attribute.GameplayEventType;
 
-                    AddGameplayEvent(entity, gameplayBehaviour.GetType(), componentType, eventDelegate, fullGameplayEventRefs);
+                    AddGameplayEvent(entity, gameplayBehaviour.GetType(), componentType, eventDelegate, fullGameplayEventRefs, addedComponents);
                 }
 
                 AddBuffer<GameplayActionRequirement>(entity);
@@ -46,7 +48,7 @@ namespace Waddle.GameplayBehaviours.Authoring
 
             private void AddGameplayEvent(Entity entity, Type behaviourType,
                 ComponentType componentType, Delegate eventDelegate,
-                DynamicBuffer<FullGameplayEventReference> fullGameplayEventRefs)
+                DynamicBuffer<FullGameplayEventReference> fullGameplayEventRefs, List<ComponentType> addedComponents)
             {
                 var eventInfoEntity = CreateAdditionalEntity(TransformUsageFlags.None, true);
                 AddComponent(eventInfoEntity, new GameplayEventInfo
@@ -55,7 +57,11 @@ namespace Waddle.GameplayBehaviours.Authoring
                     MethodName = eventDelegate.Method.Name,
                 });
 
-                AddComponent(entity, componentType);
+                if (!addedComponents.Contains(componentType))
+                {
+                    AddComponent(entity, componentType);
+                    addedComponents.Add(componentType);
+                }
 
                 var typeHash = TypeManager.GetTypeInfo(componentType.TypeIndex).StableTypeHash;
                 var methodHash = componentType.IsBuffer ? new FixedString64Bytes(eventDelegate.Method.Name).GetHashCode() : 0;
