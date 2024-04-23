@@ -1,6 +1,6 @@
 ﻿using AOT;
-using Battlemage.GameplayBehaviours.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+using Battlemage.GameplayBehaviours.Extensions;
 using Battlemage.SimpleVelocity.Data;
 using Unity.Burst;
 using Unity.Entities;

@@ -1,5 +1,4 @@
 using AOT;
-using Battlemage.GameplayBehaviours.Data;
 using Battlemage.GameplayBehaviours.Data.InputEvents;
 using Battlemage.PlayerController.Data;
 using Unity.Burst;
@@ -9,6 +8,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Waddle.FirstPersonCharacter.Data;
+using Waddle.GameplayAbilities.Extensions;
 using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
 
