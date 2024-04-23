@@ -5,7 +5,7 @@ using Battlemage.Attributes.Systems;
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
-using Waddle.Attributes.Data;
+using Waddle.GameplayAttributes.Data;
 
 namespace Battlemage.Attributes.Authoring
 {

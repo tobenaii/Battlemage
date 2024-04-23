@@ -6,9 +6,9 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using Waddle.Abilities.Data;
-using Waddle.Attributes.Data;
-using Waddle.Attributes.Extensions;
 using Waddle.GameplayActions.Data;
+using Waddle.GameplayAttributes.Data;
+using Waddle.GameplayAttributes.Extensions;
 using Waddle.Utilities;
 
 namespace Battlemage.GameplayBehaviours.Data
@@ -79,7 +79,7 @@ namespace Battlemage.GameplayBehaviours.Data
 
         public void DealDamage(Entity source, float amount, Entity target)
         {
-            var attributeMap = _entityManager.GetBuffer<AttributeMap>(target).AsMap();
+            var attributeMap = _entityManager.GetBuffer<GameplayAttributeMap>(target).AsMap();
             var health = attributeMap[(byte)BattlemageAttribute.Health];
             health.CurrentValue -= amount;
             attributeMap[(byte)BattlemageAttribute.Health] = health;

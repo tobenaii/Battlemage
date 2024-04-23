@@ -4,7 +4,7 @@ using Waddle.GameplayActions.Data;
 namespace Waddle.GameplayActions.Systems
 {
     [UpdateInGroup(typeof(GameplayActionRequestsSystemGroup), OrderLast = true)]
-    public partial struct ClearActionRequirementsSystem : ISystem
+    public partial struct ClearGameplayActionRequirementsSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)
         {

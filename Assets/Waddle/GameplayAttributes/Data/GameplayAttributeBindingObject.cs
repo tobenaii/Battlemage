@@ -1,10 +1,10 @@
 ﻿using Unity.Properties;
 using UnityEngine;
 
-namespace Waddle.Attributes.Data
+namespace Waddle.GameplayAttributes.Data
 {
     [CreateAssetMenu(menuName = "Waddle/AbilitySystem/AttributeBindingObject")]
-    public class AttributeBindingObject : ScriptableObject
+    public class GameplayAttributeBindingObject : ScriptableObject
     {
         [CreateProperty]
         public float Value { get; set; }

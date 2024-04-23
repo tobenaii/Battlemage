@@ -1,8 +1,8 @@
 ﻿using Unity.Burst;
 using Unity.Entities;
-using Waddle.Attributes.Data;
-using Waddle.Attributes.Extensions;
 using Waddle.GameplayActions.Data;
+using Waddle.GameplayAttributes.Data;
+using Waddle.GameplayAttributes.Extensions;
 
 namespace Waddle.GameplayActions.Systems
 {
@@ -15,7 +15,7 @@ namespace Waddle.GameplayActions.Systems
         public void OnUpdate(ref SystemState state)
         {
             foreach (var (requirements, attributes, result) in SystemAPI
-                         .Query<DynamicBuffer<GameplayActionRequirement>, DynamicBuffer<AttributeMap>, RefRW<GameplayActionRequirementResult>>())
+                         .Query<DynamicBuffer<GameplayActionRequirement>, DynamicBuffer<GameplayAttributeMap>, RefRW<GameplayActionRequirementResult>>())
             {
                 var attributeMap = attributes.AsMap();
                 for (var i = 0; i < requirements.Length; i++)
