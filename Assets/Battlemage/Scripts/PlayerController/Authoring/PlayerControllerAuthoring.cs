@@ -18,14 +18,18 @@ namespace Battlemage.PlayerController.Authoring
     public class PlayerControllerAuthoring : GameplayBehaviour
     {
         [SerializeField] private GameObject _primaryAbilityPrefab;
-
-        protected override void Bake(Entity entity)
+        
+        public class Baker : Baker<PlayerControllerAuthoring>
         {
-            Baker.AddComponent(entity, new Data.PlayerController()
+            public override void Bake(PlayerControllerAuthoring authoring)
             {
-                PrimaryAbility = Baker.GetEntity(_primaryAbilityPrefab, TransformUsageFlags.Dynamic)
-            });
-            Baker.AddComponent<PlayerCharacterInputs>(entity);
+                var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
+                AddComponent(entity, new Data.PlayerController()
+                {
+                    PrimaryAbility = GetEntity(authoring._primaryAbilityPrefab, TransformUsageFlags.Dynamic)
+                });
+                AddComponent<PlayerCharacterInputs>(entity);
+            }
         }
         
         [GameplayEvent(typeof(InputJumpEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(InputJumpEvent.Delegate))]

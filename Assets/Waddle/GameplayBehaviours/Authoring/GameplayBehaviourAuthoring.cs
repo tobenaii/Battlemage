@@ -19,7 +19,6 @@ namespace Waddle.GameplayBehaviours.Authoring
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var gameplayBehaviour = GetComponent<GameplayBehaviour>();
-                DependsOn(gameplayBehaviour);
                 AddComponent(entity, new GameplayBehaviourHash()
                 {
                     Value = new Hash128(
@@ -30,6 +29,7 @@ namespace Waddle.GameplayBehaviours.Authoring
                     .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null);
                 var fullGameplayEventRefs = AddBuffer<FullGameplayEventReference>(entity);
+                
                 foreach (var method in methods.Where(x => !x.Name.Contains("$BurstManaged")))
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
@@ -42,7 +42,6 @@ namespace Waddle.GameplayBehaviours.Authoring
                 }
 
                 AddBuffer<GameplayActionRequirement>(entity);
-                gameplayBehaviour.Bake(entity, this);
             }
 
             private void AddGameplayEvent(Entity entity, Type behaviourType,

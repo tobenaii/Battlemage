@@ -6,21 +6,28 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 using UnityEngine.Scripting;
 using Waddle.FirstPersonCharacter.Data;
-using Waddle.GameplayAbilities.Authoring;
 using Waddle.GameplayAbilities.Data;
+using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
 
 namespace Battlemage.Abilities.Authoring
 {
     [BurstCompile, Preserve]
-    public class FireballAbilityAuthoring : AbilityBehaviour
+    public class FireballAbilityAuthoring : GameplayBehaviour
     {
-        protected override void Bake(Entity entity)
+        public class Baker : Baker<FireballAbilityAuthoring>
         {
-            base.Bake(entity);
-            Baker.AddComponent(entity, new Velocity());
+            public override void Bake(FireballAbilityAuthoring authoring)
+            {
+                var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
+                AddComponent(entity, new Velocity());
+                
+                AddComponent(entity, new GameplayAbilityData());
+                AddBuffer<GameplayAbilityActivationAttributeRequirement>(entity);
+            }
         }
         
         [GameplayEvent(typeof(GameplayOnSpawnEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(GameplayOnSpawnEvent.Delegate))]
