@@ -1,10 +1,10 @@
 ﻿using Unity.Entities;
 using Unity.NetCode;
 
-namespace Waddle.Abilities.Data
+namespace Waddle.GameplayAbilities.Data
 {
     [GhostComponent]
-    public struct AbilityData : IComponentData
+    public struct GameplayAbilityData : IComponentData
     {
         [GhostField]
         public Entity Source;

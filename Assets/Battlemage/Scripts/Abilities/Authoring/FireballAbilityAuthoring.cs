@@ -7,8 +7,8 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine.Scripting;
-using Waddle.Abilities.Data;
 using Waddle.FirstPersonCharacter.Data;
+using Waddle.GameplayAbilities.Data;
 using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
 
@@ -20,7 +20,7 @@ namespace Battlemage.Abilities.Authoring
         [GameplayEvent(typeof(GameplayOnSpawnEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(GameplayOnSpawnEvent.Delegate))]
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
-            var abilityData = state.GetComponent<AbilityData>(self);
+            var abilityData = state.GetComponent<GameplayAbilityData>(self);
             var playerTransform = state.GetComponent<LocalTransform>(abilityData.Source);
             var viewEntity = state.GetComponent<CharacterSettings>(abilityData.Source).ViewEntity;
             var viewTransform = state.GetComponent<LocalTransform>(viewEntity);
@@ -40,7 +40,7 @@ namespace Battlemage.Abilities.Authoring
         [GameplayEvent(typeof(GameplayOnHitEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(GameplayOnHitEvent.Delegate))]
         private static void OnHit(ref GameplayState state, ref Entity self, ref Entity target)
         {
-            var abilityData = state.GetComponent<AbilityData>(self);
+            var abilityData = state.GetComponent<GameplayAbilityData>(self);
             if (target == abilityData.Source) return;
             DoExplode(ref state, ref self);
         }

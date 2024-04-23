@@ -1,15 +1,15 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using Waddle.Abilities.Data;
+using Waddle.GameplayAbilities.Data;
 using Waddle.GameplayActions.Data;
 using Waddle.GameplayActions.Systems;
 
-namespace Waddle.Abilities.Systems
+namespace Waddle.GameplayAbilities.Systems
 {
     [UpdateInGroup(typeof(GameplayActionRequestsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
-    public partial struct AbilityActivationRequestSystem : ISystem
+    public partial struct GameplayAbilityActivationRequestSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
         {
@@ -21,10 +21,10 @@ namespace Waddle.Abilities.Systems
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var networkTime = SystemAPI.GetSingleton<NetworkTime>();
             foreach (var (abilityActivateRequests, requirementResult, ghostOwner, entity) in SystemAPI
-                         .Query<DynamicBuffer<ActivateAbilityRequest>, RefRO<GameplayActionRequirementResult>, RefRO<GhostOwner>>()
+                         .Query<DynamicBuffer<ActivateGameplayAbilityRequest>, RefRO<GameplayActionRequirementResult>, RefRO<GhostOwner>>()
                          .WithAll<Simulate>()
                          .WithEntityAccess()
-                         .WithChangeFilter<ActivateAbilityRequest>())
+                         .WithChangeFilter<ActivateGameplayAbilityRequest>())
             {
                 foreach (var request in abilityActivateRequests)
                 {
@@ -32,7 +32,7 @@ namespace Waddle.Abilities.Systems
                     if (succeeded && networkTime.IsFirstTimeFullyPredictingTick)
                     {
                         var ability = ecb.Instantiate(request.AbilityPrefab);
-                        ecb.SetComponent(ability, new AbilityData()
+                        ecb.SetComponent(ability, new GameplayAbilityData()
                         {
                             Source = entity
                         });

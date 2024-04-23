@@ -1,8 +1,8 @@
 ﻿using Unity.Entities;
 
-namespace Waddle.Abilities.Data
+namespace Waddle.GameplayAbilities.Data
 {
-    public struct ActivateAbilityRequest : IBufferElementData
+    public struct ActivateGameplayAbilityRequest : IBufferElementData
     {
         public int RequirementIndices;
         public Entity AbilityPrefab;
