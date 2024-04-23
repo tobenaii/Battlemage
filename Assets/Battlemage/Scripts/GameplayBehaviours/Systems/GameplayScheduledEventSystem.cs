@@ -19,7 +19,6 @@ namespace Battlemage.GameplayBehaviours.Systems
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<GameplayEventPointer>();
-            state.RequireForUpdate<NetworkTime>();
         }
 
         [BurstCompile]
@@ -28,7 +27,6 @@ namespace Battlemage.GameplayBehaviours.Systems
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
-            var networkTime = SystemAPI.GetSingleton<NetworkTime>();
             
             foreach (var (scheduledEvents, eventMaps, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayScheduledEvent>, DynamicBuffer<GameplayEventReference>>()
@@ -37,7 +35,8 @@ namespace Battlemage.GameplayBehaviours.Systems
             {
                 foreach (var scheduledEvent in scheduledEvents)
                 {
-                    if (networkTime.ServerTick.TickIndexForValidTick == scheduledEvent.TickToRun)
+                    var timeToRun = scheduledEvent.TimeStarted + scheduledEvent.Time;
+                    if (SystemAPI.Time.ElapsedTime >= timeToRun && SystemAPI.Time.ElapsedTime - SystemAPI.Time.DeltaTime < timeToRun)
                     {
                         var source = entity;
                         var pointer = eventMaps.GetEventPointer(eventPointers, scheduledEvent.TypeHash, scheduledEvent.MethodHash);

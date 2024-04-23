@@ -9,6 +9,7 @@ namespace Battlemage.GameplayBehaviours.Data.GameplayEvents
         public delegate void Delegate(ref GameplayState gameplayState, ref Entity source);
         public ulong TypeHash;
         public int MethodHash;
-        public uint TickToRun;
+        public float Time;
+        public double TimeStarted;
     }
 }

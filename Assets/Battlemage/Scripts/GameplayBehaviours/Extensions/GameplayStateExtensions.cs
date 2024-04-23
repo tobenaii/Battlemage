@@ -9,13 +9,12 @@ namespace Battlemage.GameplayBehaviours.Extensions
     {
         public static void ScheduleEvent(this GameplayState gameplayState, Entity entity, float time, FixedString64Bytes scheduledEvent)
         {
-            var networkTime = gameplayState.GetNetworkTime();
-            var tickToRun = networkTime.ServerTick.TickIndexForValidTick + (uint)(time * 30);
             gameplayState.GetBuffer<GameplayScheduledEvent>(entity).Add(new GameplayScheduledEvent()
             {
                 TypeHash = TypeManager.GetTypeInfo<GameplayScheduledEvent>().StableTypeHash,
                 MethodHash = scheduledEvent.GetHashCode(),
-                TickToRun = tickToRun
+                Time = time,
+                TimeStarted = gameplayState.Time.ElapsedTime
             });
         }
         

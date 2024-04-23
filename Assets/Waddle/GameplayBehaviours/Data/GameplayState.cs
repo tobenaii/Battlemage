@@ -2,8 +2,9 @@ using BovineLabs.Core.Extensions;
 using Unity.Core;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
 using Unity.Transforms;
+using Waddle.GameplayAbilities.Data;
+using Waddle.GameplayActions.Data;
 using Waddle.Utilities;
 
 namespace Waddle.GameplayBehaviours.Data
@@ -35,9 +36,9 @@ namespace Waddle.GameplayBehaviours.Data
             _entityManager.SetComponentData(entity, component);
         }
 
-        public NetworkTime GetNetworkTime()
+        public T GetSingleton<T>() where T : unmanaged, IComponentData
         {
-            return _entityManager.GetSingleton<NetworkTime>();
+            return _entityManager.GetSingleton<T>();
         }
 
         public DynamicBuffer<T> GetBuffer<T>(Entity entity) where T : unmanaged, IBufferElementData
