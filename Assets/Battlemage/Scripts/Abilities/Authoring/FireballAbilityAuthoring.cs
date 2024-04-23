@@ -6,7 +6,6 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using UnityEngine.Scripting;
 using Waddle.FirstPersonCharacter.Data;
 using Waddle.GameplayAbilities.Data;
@@ -33,17 +32,9 @@ namespace Battlemage.Abilities.Authoring
         [GameplayEvent(typeof(GameplayOnSpawnEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(GameplayOnSpawnEvent.Delegate))]
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
-            var abilityData = state.GetComponent<GameplayAbilityData>(self);
-            var playerTransform = state.GetComponent<LocalTransform>(abilityData.Source);
-            var viewEntity = state.GetComponent<CharacterSettings>(abilityData.Source).ViewEntity;
-            var viewTransform = state.GetComponent<LocalTransform>(viewEntity);
+            var transform = state.GetComponent<LocalTransform>(self);
             
-            playerTransform.Position += playerTransform.Up() * 1.25f;
-            playerTransform.Rotation = math.mul(playerTransform.Rotation, viewTransform.Rotation);
-            playerTransform.Position += playerTransform.Forward();
-            state.SetComponent(self, playerTransform);
-
-            var velocity = new Velocity() { Value = playerTransform.Forward() * 20.0f };
+            var velocity = new Velocity() { Value = transform.Forward() * 20.0f };
             state.SetComponent(self, velocity);
             
             state.ScheduleEvent(self, 10.0f, nameof(DoExplode));

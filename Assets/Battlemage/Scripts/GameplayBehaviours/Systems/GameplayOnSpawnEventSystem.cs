@@ -1,18 +1,16 @@
-﻿using Battlemage.GameplayBehaviours.Data;
-using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+﻿using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+using BovineLabs.Core.Groups;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using Waddle.GameplayActions.Systems;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Extensions;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
     [BurstCompile]
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [UpdateAfter(typeof(GameplayActionRequestsSystemGroup))]
+    [UpdateInGroup(typeof(BeginSimulationSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayOnSpawnEventSystem : ISystem
     {
@@ -27,12 +25,10 @@ namespace Battlemage.GameplayBehaviours.Systems
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
-            var networkTime = SystemAPI.GetSingleton<NetworkTime>();
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
-
-            if (!networkTime.IsFirstTimeFullyPredictingTick) return;
-
-            foreach (var (eventRefs, entity) in SystemAPI.Query<DynamicBuffer<GameplayEventReference>>()
+            
+            foreach (var (eventRefs, entity) in SystemAPI
+                         .Query<DynamicBuffer<GameplayEventReference>>()
                          .WithAll<GameplayOnSpawnEvent>()
                          .WithEntityAccess())
             {

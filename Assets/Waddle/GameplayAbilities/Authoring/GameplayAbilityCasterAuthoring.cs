@@ -7,6 +7,8 @@ namespace Waddle.GameplayAbilities.Authoring
 {
     public class GameplayAbilityCasterAuthoring : MonoBehaviour
     {
+        [SerializeField] private Transform _abilitySpawnPoint;
+        
         public class AbilityCasterAuthoringBaker : Baker<GameplayAbilityCasterAuthoring>
         {
             public override void Bake(GameplayAbilityCasterAuthoring authoring)
@@ -15,6 +17,10 @@ namespace Waddle.GameplayAbilities.Authoring
                 AddBuffer<ActivateGameplayAbilityRequest>(entity);
                 AddBuffer<GameplayActionRequirement>(entity);
                 AddComponent<GameplayActionRequirementResult>(entity);
+                AddComponent(entity, new GameplayAbilityCasterData()
+                {
+                    AbilitySpawnPoint = GetEntity(authoring._abilitySpawnPoint, TransformUsageFlags.Dynamic) 
+                });
             }
         }
     }
