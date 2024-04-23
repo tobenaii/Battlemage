@@ -43,7 +43,7 @@ namespace Waddle.GameplayBehaviours.Systems
         private void Reload(string filePath)
         {
             var monoScript = AssetDatabase.LoadAssetAtPath<MonoScript>(filePath);
-            if (monoScript == null || monoScript.GetClass().BaseType != typeof(GameplayBehaviourAuthoring))
+            if (monoScript == null || monoScript.GetClass().BaseType != typeof(Authoring.GameplayBehaviour))
             {
                 return;
             }

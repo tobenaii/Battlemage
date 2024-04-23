@@ -8,15 +8,21 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine.Scripting;
 using Waddle.FirstPersonCharacter.Data;
+using Waddle.GameplayAbilities.Authoring;
 using Waddle.GameplayAbilities.Data;
-using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
 
 namespace Battlemage.Abilities.Authoring
 {
     [BurstCompile, Preserve]
-    public class FireballAbilityAuthoring : GameplayBehaviourAuthoring
+    public class FireballAbilityAuthoring : AbilityBehaviour<FireballAbilityAuthoring>
     {
+        protected override void Bake(Entity entity)
+        {
+            base.Bake(entity);
+            Baker.AddComponent(entity, new Velocity());
+        }
+        
         [GameplayEvent(typeof(GameplayOnSpawnEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(GameplayOnSpawnEvent.Delegate))]
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
@@ -49,15 +55,6 @@ namespace Battlemage.Abilities.Authoring
         private static void DoExplode(ref GameplayState state, ref Entity self)
         {
             state.MarkForDestroy(self);
-        }
-
-        public class FireballAbilityAuthoringBaker : Baker<FireballAbilityAuthoring>
-        {
-            public override void Bake(FireballAbilityAuthoring authoring)
-            {
-                var entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponent(entity, new Velocity());
-            }
         }
     }
 }

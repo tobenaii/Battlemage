@@ -7,7 +7,7 @@ using Hash128 = Unity.Entities.Hash128;
 namespace Waddle.GameplayBehaviours.Authoring
 {
     [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-    public partial class GameplayEventsBakingSystem : SystemBase
+    public partial class GameplayBehaviourBakingSystem : SystemBase
     {
         protected override void OnCreate()
         {

@@ -15,8 +15,19 @@ using Waddle.GameplayBehaviours.Data;
 namespace Battlemage.PlayerController.Authoring
 {
     [BurstCompile, Preserve]
-    public class PlayerControllerAuthoring : GameplayBehaviourAuthoring
+    public class PlayerControllerAuthoring : GameplayBehaviour
     {
+        [SerializeField] private GameObject _primaryAbilityPrefab;
+
+        protected override void Bake(Entity entity)
+        {
+            Baker.AddComponent(entity, new Data.PlayerController()
+            {
+                PrimaryAbility = Baker.GetEntity(_primaryAbilityPrefab, TransformUsageFlags.Dynamic)
+            });
+            Baker.AddComponent<PlayerCharacterInputs>(entity);
+        }
+        
         [GameplayEvent(typeof(InputJumpEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(InputJumpEvent.Delegate))]
         private static void OnJump(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
         {
@@ -55,23 +66,8 @@ namespace Battlemage.PlayerController.Authoring
         {
             if (buttonState.WasPressed)
             {
-                var character = state.GetComponent<Data.PlayerController>(self).Character;
-                state.TryActivateAbility(character, state.GetComponent<Data.PlayerController>(self).PrimaryAbilityPrefab);
-            }
-        }
-
-        [SerializeField] private GameObject _primaryAbilityPrefab;
-
-        public class Baker : Baker<PlayerControllerAuthoring>
-        {
-            public override void Bake(PlayerControllerAuthoring authoring)
-            {
-                var entity = GetEntity(TransformUsageFlags.None);
-                AddComponent(entity, new Data.PlayerController()
-                {
-                    PrimaryAbilityPrefab = GetEntity(authoring._primaryAbilityPrefab, TransformUsageFlags.Dynamic)
-                });
-                AddComponent<PlayerCharacterInputs>(entity);
+                var playerController = state.GetComponent<Data.PlayerController>(self);
+                state.TryActivateAbility(playerController.Character, playerController.PrimaryAbility);
             }
         }
     }

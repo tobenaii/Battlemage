@@ -9,6 +9,6 @@ namespace Battlemage.PlayerController.Data
     public struct PlayerController : IComponentData
     {
         [GhostField] public Entity Character;
-        public Entity PrimaryAbilityPrefab;
+        public Entity PrimaryAbility;
     }
 }
