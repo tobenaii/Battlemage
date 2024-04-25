@@ -24,14 +24,11 @@ namespace Battlemage.PlayerController.Systems
             _playerInput = new PlayerInput();
             _playerInput.Enable();
             _playerInput.Gameplay.Enable();
-            RequireForUpdate<NetworkTime>();
         }
 
         private NetworkTick _prevTick;
         protected override void OnUpdate()
         {
-            var networkTime = SystemAPI.GetSingleton<NetworkTime>();
-            var currentTick = networkTime.ServerTick;
             var gameplayActions = _playerInput.Gameplay;
             foreach (var playerCommands in SystemAPI
                          .Query<RefRW<PlayerCharacterInputs>>()
@@ -41,16 +38,12 @@ namespace Battlemage.PlayerController.Systems
                     Vector2.ClampMagnitude(gameplayActions.Move.ReadValue<Vector2>(), 1f);
 
                 float2 mouseLookInputDelta = gameplayActions.Look.ReadValue<Vector2>() * 1.0f;
-                if (_prevTick != currentTick)
-                {
-                    _prevTick = currentTick;
-                    playerCommands.ValueRW.Jump = default;
-                    playerCommands.ValueRW.PrimaryAbility = default;
-                }
 
                 NetworkInputUtilities.AddInputDelta(ref playerCommands.ValueRW.LookInputDelta.x, mouseLookInputDelta.x);
                 NetworkInputUtilities.AddInputDelta(ref playerCommands.ValueRW.LookInputDelta.y, mouseLookInputDelta.y);
 
+                playerCommands.ValueRW.Jump = default;
+                playerCommands.ValueRW.PrimaryAbility = default;
                 if (gameplayActions.Jump.WasPressedThisFrame())
                 {
                     playerCommands.ValueRW.Jump.Pressed();

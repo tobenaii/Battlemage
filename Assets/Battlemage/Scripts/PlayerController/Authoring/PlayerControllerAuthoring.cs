@@ -37,7 +37,7 @@ namespace Battlemage.PlayerController.Authoring
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
             var characterCommands = state.GetComponent<FirstPersonCharacterControl>(character);
-            characterCommands.Jump = buttonState.WasPressed;
+            characterCommands.Jump = buttonState.WasPressed.IsSet;
             state.SetComponent(character, characterCommands);
         }
         
@@ -68,7 +68,7 @@ namespace Battlemage.PlayerController.Authoring
         [GameplayEvent(typeof(InputPrimaryAbilityEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(InputPrimaryAbilityEvent.Delegate))]
         private static void OnPrimaryAbility(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
         {
-            if (buttonState.WasPressed)
+            if (buttonState.WasPressed.IsSet)
             {
                 var playerController = state.GetComponent<Data.PlayerController>(self);
                 state.TryActivateAbility(playerController.Character, playerController.PrimaryAbility);

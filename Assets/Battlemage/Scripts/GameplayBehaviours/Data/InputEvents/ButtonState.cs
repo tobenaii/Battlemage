@@ -1,23 +1,24 @@
-﻿using Waddle.Utilities;
+﻿using Unity.NetCode;
+using Waddle.Utilities;
 
 namespace Battlemage.GameplayBehaviours.Data.InputEvents
 {
     public struct ButtonState
     {
-        public BlittableBool WasPressed;
-        public BlittableBool WasReleased;
+        public InputEvent WasPressed;
+        public InputEvent WasReleased;
         public BlittableBool IsDown;
 
         public void Pressed()
         {
-            WasPressed = true;
+            WasPressed.Set();
             IsDown = true;
         }
 
         public void Released()
         {
             IsDown = false;
-            WasReleased = true;
+            WasReleased.Set();
         }
     }
 }
