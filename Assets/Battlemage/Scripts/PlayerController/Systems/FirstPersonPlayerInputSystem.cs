@@ -1,4 +1,5 @@
-﻿using Battlemage.PlayerController.Data;
+﻿using Battlemage.Networking.Utilities;
+using Battlemage.PlayerController.Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -42,15 +43,13 @@ namespace Battlemage.PlayerController.Systems
                 float2 mouseLookInputDelta = gameplayActions.Look.ReadValue<Vector2>() * 1.0f;
                 if (_prevTick != currentTick)
                 {
-                    playerCommands.ValueRW.LookInputDelta.x = 0;
-                    playerCommands.ValueRW.LookInputDelta.y = 0;
                     _prevTick = currentTick;
                     playerCommands.ValueRW.Jump = default;
                     playerCommands.ValueRW.PrimaryAbility = default;
                 }
 
-                playerCommands.ValueRW.LookInputDelta.x += mouseLookInputDelta.x;
-                playerCommands.ValueRW.LookInputDelta.y += mouseLookInputDelta.y;
+                NetworkInputUtilities.AddInputDelta(ref playerCommands.ValueRW.LookInputDelta.x, mouseLookInputDelta.x);
+                NetworkInputUtilities.AddInputDelta(ref playerCommands.ValueRW.LookInputDelta.y, mouseLookInputDelta.y);
 
                 if (gameplayActions.Jump.WasPressedThisFrame())
                 {

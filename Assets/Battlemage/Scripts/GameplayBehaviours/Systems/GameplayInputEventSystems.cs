@@ -1,9 +1,10 @@
-﻿using Battlemage.GameplayBehaviours.Data;
-using Battlemage.GameplayBehaviours.Data.InputEvents;
+﻿using Battlemage.GameplayBehaviours.Data.InputEvents;
+using Battlemage.Networking.Utilities;
 using Battlemage.PlayerController.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Extensions;
@@ -28,8 +29,8 @@ namespace Battlemage.GameplayBehaviours.Systems
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
 
-            foreach (var (eventRefs, inputs, entity) in SystemAPI
-                         .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>>()
+            foreach (var (eventRefs, inputs, inputCommands, entity) in SystemAPI
+                         .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>, DynamicBuffer<InputBufferData<PlayerCharacterInputs>>>()
                          .WithAll<GhostOwnerIsLocal, Simulate>()
                          .WithAny<InputLookEvent, InputPrimaryAbilityEvent>()
                          .WithEntityAccess())
@@ -37,7 +38,11 @@ namespace Battlemage.GameplayBehaviours.Systems
                 var source = entity;
                 if (SystemAPI.HasComponent<InputLookEvent>(entity))
                 {
-                    var lookDelta = inputs.ValueRO.LookInputDelta;
+                    NetworkInputUtilities.GetCurrentAndPreviousTick(SystemAPI.GetSingleton<NetworkTime>(), out var currentTick, out var previousTick);
+                    NetworkInputUtilities.GetCurrentAndPreviousTickInputs(inputCommands, currentTick, previousTick, out var currentTickInputs, out var previousTickInputs);
+                    float2 lookDelta;
+                    lookDelta.x = NetworkInputUtilities.GetInputDelta(currentTickInputs.LookInputDelta.x, previousTickInputs.LookInputDelta.x);
+                    lookDelta.y = NetworkInputUtilities.GetInputDelta(currentTickInputs.LookInputDelta.y, previousTickInputs.LookInputDelta.y);
                     var lookPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputLookEvent>().StableTypeHash);
                     new FunctionPointer<InputLookEvent.Delegate>(lookPointer).Invoke(ref gameplayState, ref source, ref lookDelta);
                 }
