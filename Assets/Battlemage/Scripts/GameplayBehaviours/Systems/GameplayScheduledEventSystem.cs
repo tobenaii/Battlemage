@@ -1,4 +1,4 @@
-﻿using Battlemage.GameplayBehaviours.Data;
+﻿using System;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Unity.Burst;
 using Unity.Collections;
@@ -6,7 +6,6 @@ using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
 using Waddle.GameplayBehaviours.Data;
-using Waddle.GameplayBehaviours.Extensions;
 using Waddle.GameplayBehaviours.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
@@ -27,21 +26,29 @@ namespace Battlemage.GameplayBehaviours.Systems
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
+            var deltaTime = SystemAPI.Time.DeltaTime;
             
-            foreach (var (scheduledEvents, eventMaps, entity) in SystemAPI
-                         .Query<DynamicBuffer<GameplayScheduledEvent>, DynamicBuffer<GameplayEventReference>>()
+            foreach (var (scheduledEvents, entity) in SystemAPI
+                         .Query<DynamicBuffer<GameplayScheduledEvent>>()
                          .WithAll<Simulate>()
                          .WithEntityAccess())
             {
-                foreach (var scheduledEvent in scheduledEvents)
+                for (var i = 0; i < scheduledEvents.Length; i++)
                 {
-                    var timeToRun = scheduledEvent.TimeStarted + scheduledEvent.Time;
-                    if (SystemAPI.Time.ElapsedTime >= timeToRun && SystemAPI.Time.ElapsedTime - SystemAPI.Time.DeltaTime < timeToRun)
+                    var scheduledEvent = scheduledEvents[i];
+                    if (scheduledEvent.Countdown > 0 && scheduledEvent.Countdown - deltaTime <= 0)
                     {
                         var source = entity;
-                        var pointer = eventMaps.GetEventPointer(eventPointers, scheduledEvent.TypeHash, scheduledEvent.MethodHash);
-                        new FunctionPointer<GameplayScheduledEvent.Delegate>(pointer).Invoke(ref gameplayState, ref source);
+                        var pointer = new IntPtr(eventPointers[scheduledEvent.EventIndex].Pointer);
+                        new FunctionPointer<GameplayScheduledEvent.Delegate>(pointer).Invoke(ref gameplayState,
+                            ref source);
+                        scheduledEvents.RemoveAt(i);
+                        i--;
+                        continue;
                     }
+
+                    scheduledEvent.Countdown -= deltaTime;
+                    scheduledEvents[i] = scheduledEvent;
                 }
             }
 

@@ -17,7 +17,6 @@ namespace Battlemage.GameplayBehaviours.Systems
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<GameplayEventPointer>();
-            state.RequireForUpdate<NetworkTime>();
         }
 
         [BurstCompile]
@@ -35,7 +34,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                 var source = entity;
                 var pointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<GameplayOnSpawnEvent>().StableTypeHash);
                 new FunctionPointer<GameplayOnSpawnEvent.Delegate>(pointer).Invoke(ref gameplayState, ref source);
-                ecb.RemoveComponent<GameplayOnSpawnEvent>(entity);
+                ecb.SetComponentEnabled<GameplayOnSpawnEvent>(entity, false);
             }
             ecb.Playback(state.EntityManager);
             ecb.Dispose();

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 using Waddle.GameplayBehaviours.Data;
 using Hash128 = Unity.Entities.Hash128;
 
@@ -42,11 +43,14 @@ namespace Waddle.GameplayBehaviours.Authoring
                 var eventRefs = ecb.AddBuffer<GameplayEventReference>(entity);
                 foreach (var fullEventRef in fullEventRefs)
                 {
-                    int eventIndex = mappingHashes.IndexOf(fullEventRef.FullHash);
+                    byte eventIndex = (byte)mappingHashes.IndexOf(fullEventRef.FullHash);
                     eventRefs.Add(new GameplayEventReference()
                     {
-                        TypeHash = fullEventRef.TypeHash,
-                        MethodHash = fullEventRef.MethodHash,
+                        EventHash = new GameplayEventHash()
+                        {
+                            TypeHash = fullEventRef.TypeHash,
+                            MethodHash = fullEventRef.MethodHash
+                        },
                         Index = eventIndex
                     });
                 }

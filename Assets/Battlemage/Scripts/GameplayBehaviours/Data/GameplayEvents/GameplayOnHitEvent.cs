@@ -7,9 +7,8 @@ namespace Battlemage.GameplayBehaviours.Data.GameplayEvents
     public struct GameplayOnHitEvent : IBufferElementData
     {
         public delegate void Delegate(ref GameplayState gameplayState, ref Entity source, ref Entity target);
-        
-        public ulong TypeHash;
-        public int MethodHash;
+
+        public short EventIndex;
         public float Radius;
     }
 }

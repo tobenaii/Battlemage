@@ -40,6 +40,11 @@ namespace Waddle.GameplayBehaviours.Data
         {
             return _entityManager.GetSingleton<T>();
         }
+        
+        public DynamicBuffer<T> GetSingletonBuffer<T>() where T : unmanaged, IBufferElementData
+        {
+            return _entityManager.GetSingletonBuffer<T>();
+        }
 
         public DynamicBuffer<T> GetBuffer<T>(Entity entity) where T : unmanaged, IBufferElementData
         {

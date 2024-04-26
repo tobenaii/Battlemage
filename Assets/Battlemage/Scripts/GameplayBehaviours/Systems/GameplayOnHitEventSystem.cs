@@ -1,4 +1,5 @@
-﻿using Battlemage.GameplayBehaviours.Data;
+﻿using System;
+using Battlemage.GameplayBehaviours.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Unity.Burst;
 using Unity.Collections;
@@ -58,7 +59,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                         {
                             var self = entity;
                             var target = hit.Entity;
-                            var pointer = eventRefs.GetEventPointer(eventPointers, onHitEvent.TypeHash, onHitEvent.MethodHash);
+                            var pointer = new IntPtr(eventPointers[onHitEvent.EventIndex].Pointer);
                             new FunctionPointer<GameplayOnHitEvent.Delegate>(pointer).Invoke(ref gameplayState, ref self, ref target);
                         }
                     }

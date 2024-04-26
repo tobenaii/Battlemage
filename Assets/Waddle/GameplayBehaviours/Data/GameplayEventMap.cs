@@ -5,9 +5,8 @@ namespace Waddle.GameplayBehaviours.Data
     [InternalBufferCapacity(0)]
     public struct GameplayEventReference : IBufferElementData
     {
-        public ulong TypeHash;
-        public int MethodHash;
-        public int Index;
+        public GameplayEventHash EventHash;
+        public byte Index;
     }
     
     public struct FullGameplayEventReference : IBufferElementData
