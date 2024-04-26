@@ -4,10 +4,8 @@ using Battlemage.GameplayBehaviours.Extensions;
 using Battlemage.SimpleVelocity.Data;
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine.Scripting;
-using Waddle.FirstPersonCharacter.Data;
 using Waddle.GameplayAbilities.Data;
 using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
@@ -33,9 +31,11 @@ namespace Battlemage.Abilities.Authoring
         private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
             var transform = state.GetComponent<LocalTransform>(self);
-            
+            transform.Position += transform.Forward(); 
             var velocity = new Velocity() { Value = transform.Forward() * 20.0f };
+            
             state.SetComponent(self, velocity);
+            state.SetComponent(self, transform);
             
             state.ScheduleEvent(self, 10.0f, nameof(DoExplode));
             state.AddOverlapSphereCallback(self, 0.25f, nameof(OnHit));
