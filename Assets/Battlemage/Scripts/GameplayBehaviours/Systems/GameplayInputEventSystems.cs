@@ -28,7 +28,7 @@ namespace Battlemage.GameplayBehaviours.Systems
             var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
-
+            
             foreach (var (eventRefs, inputs, inputCommands, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>, DynamicBuffer<InputBufferData<PlayerCharacterInputs>>>()
                          .WithAll<GhostOwnerIsLocal, Simulate>()
