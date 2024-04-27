@@ -1,4 +1,5 @@
 ﻿using AOT;
+using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Battlemage.GameplayBehaviours.Extensions;
 using Battlemage.SimpleVelocity.Data;
@@ -9,6 +10,8 @@ using UnityEngine.Scripting;
 using Waddle.GameplayAbilities.Data;
 using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
+using Waddle.GameplayEffects.Data;
+using Waddle.GameplayEffects.Extensions;
 
 namespace Battlemage.Abilities.Authoring
 {
@@ -46,6 +49,12 @@ namespace Battlemage.Abilities.Authoring
         {
             var abilityData = state.GetComponent<GameplayAbilityData>(self);
             if (target == abilityData.Source) return;
+            state.CreateGameplayEffect()
+                .WithAttributeModifier(
+                    (byte)BattlemageAttribute.Health,
+                    GameplayAttributeModifier.Operation.Negate,
+                    10)
+                .Apply(abilityData.Source, abilityData.Source);
             DoExplode(ref state, ref self);
         }
         

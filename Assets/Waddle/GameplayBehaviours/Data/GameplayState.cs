@@ -3,8 +3,6 @@ using Unity.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Waddle.GameplayAbilities.Data;
-using Waddle.GameplayActions.Data;
 using Waddle.Utilities;
 
 namespace Waddle.GameplayBehaviours.Data
@@ -17,6 +15,7 @@ namespace Waddle.GameplayBehaviours.Data
         private readonly BlittableBool _isServer;
 
         public TimeData Time => _time;
+        public bool IsServer => _isServer;
         
         public GameplayState(EntityManager entityManager, EntityCommandBuffer ecb, TimeData time, BlittableBool isServer)
         {
@@ -50,6 +49,11 @@ namespace Waddle.GameplayBehaviours.Data
         {
             return _entityManager.GetBuffer<T>(entity);
         }
+
+        public Entity Instantiate(Entity prefab)
+        {
+            return _entityManager.Instantiate(prefab);
+        }
         
         public void MarkForDestroy(Entity entity)
         {
@@ -68,5 +72,6 @@ namespace Waddle.GameplayBehaviours.Data
         {
             return _entityManager.GetComponentData<LocalTransform>(entity).Right();
         }
+        
     }
 }

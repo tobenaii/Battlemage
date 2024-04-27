@@ -11,5 +11,6 @@ namespace Waddle.GameplayEffects.Data
         }
         
         public TypeIndex Tag;
+        public Operation OperationType;
     }
 }

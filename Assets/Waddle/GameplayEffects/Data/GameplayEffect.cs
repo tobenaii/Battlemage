@@ -1,10 +1,13 @@
 ﻿using Unity.Entities;
+using Unity.NetCode;
 
 namespace Waddle.GameplayEffects.Data
 {
-    public struct GameplayEffect : IBufferElementData
+    [GhostComponent]
+    public struct GameplayEffect : IComponentData
     {
-        public Entity TargetEntity;
+        public Entity Source;
+        public Entity Target;
         public float Duration;
     }
 }
