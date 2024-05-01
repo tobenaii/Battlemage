@@ -6,7 +6,6 @@ using Unity.Entities;
 using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
-using UnityEngine;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Systems;
 
