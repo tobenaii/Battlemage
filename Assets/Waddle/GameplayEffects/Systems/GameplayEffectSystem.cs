@@ -2,7 +2,6 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
 using Waddle.GameplayAttributes.Data;
 using Waddle.GameplayAttributes.Extensions;
 using Waddle.GameplayEffects.Data;
@@ -10,8 +9,7 @@ using Waddle.GameplayEffects.Data;
 namespace Waddle.GameplayEffects.Systems
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderLast = true)]
-    [CreateAfter(typeof(DefaultVariantSystemGroup))]
-    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayEffectSystem : ISystem
     {
         private struct TargetAttributeKey : IEquatable<TargetAttributeKey>
@@ -40,27 +38,6 @@ namespace Waddle.GameplayEffects.Systems
         {
             _keysToProcess = new NativeList<TargetAttributeKey>(20, Allocator.Persistent);
             _modificationsMap = new NativeHashMap<TargetAttributeKey, AttributeModifications>(20, Allocator.Persistent);
-            
-            var prefab = state.EntityManager.CreateEntity(
-                ComponentType.ReadOnly<Prefab>(),
-                ComponentType.ReadOnly<GhostOwner>(),
-                ComponentType.ReadOnly<GameplayEffect>(),
-                ComponentType.ReadOnly<GameplayAttributeModifier>(),
-                ComponentType.ReadOnly<GameplayTagModifier>()
-            );
-
-            GhostPrefabCreation.ConvertToGhostPrefab(state.EntityManager, prefab, new GhostPrefabCreation.Config()
-            {
-                Name = "GameplayEffect",
-                DefaultGhostMode = GhostMode.OwnerPredicted,
-            });
-            
-            state.EntityManager.CreateSingleton(new GameplayEffectPrefab()
-            {
-                Value = prefab
-            });
-            
-            state.RequireForUpdate<NetworkTime>();
         }
 
         public void OnDestroy(ref SystemState state)
@@ -75,24 +52,12 @@ namespace Waddle.GameplayEffects.Systems
             _modificationsMap.Clear();
 
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-            var predictedGhostLookup = SystemAPI.GetComponentLookup<PredictedGhost>();
 
-            foreach (var (gameplayEffect, attributeModifiers, tagModifiers, predictedGhost, entity) in SystemAPI
-                         .Query<RefRW<GameplayEffect>, DynamicBuffer<GameplayAttributeModifier>,
-                             DynamicBuffer<GameplayTagModifier>, RefRO<PredictedGhost>>()
+            foreach (var (gameplayEffect, attributeModifiers, entity) in SystemAPI
+                         .Query<RefRW<GameplayEffect>, DynamicBuffer<GameplayAttributeModifier>>()
                          .WithAll<Simulate>()
                          .WithEntityAccess())
             {
-                var characterGhost = predictedGhostLookup[gameplayEffect.ValueRO.Target];
-                var tick = predictedGhost.ValueRO.AppliedTick;
-                if (tick.IsValid)
-                {
-                    tick.Decrement();
-                    if (characterGhost.AppliedTick.IsNewerThan(tick))
-                    {
-                        continue;
-                    }
-                }
                 var target = gameplayEffect.ValueRO.Target;
                 var isInstant = gameplayEffect.ValueRO.Duration == 0 && state.WorldUnmanaged.IsServer();
                 if (isInstant)

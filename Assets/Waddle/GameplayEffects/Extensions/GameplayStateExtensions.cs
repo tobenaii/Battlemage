@@ -1,6 +1,5 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayEffects.Data;
 
@@ -48,8 +47,7 @@ namespace Waddle.GameplayEffects.Extensions
             
             public void Apply(Entity source, Entity target, float duration = 0)
             {
-                var networkTime = _gameplayState.GetSingleton<NetworkTime>();
-                if (!networkTime.IsFirstTimeFullyPredictingTick) return;
+                if (!_gameplayState.IsServer) return;
                 
                 var effectPrefab = _gameplayState.GetSingleton<GameplayEffectPrefab>().Value;
                 var effectInstance = _gameplayState.Instantiate(effectPrefab);
@@ -63,11 +61,6 @@ namespace Waddle.GameplayEffects.Extensions
                     Target = target,
                     Duration = duration
                 });
-
-                if (_gameplayState.IsServer)
-                {
-                    _gameplayState.SetComponent(effectInstance, _gameplayState.GetComponent<GhostOwner>(source));
-                }
                 
                 attributeModifiers.AddRange(_attributeModifiers.AsArray());
                 tagModifiers.AddRange(_tagModifiers.AsArray());
