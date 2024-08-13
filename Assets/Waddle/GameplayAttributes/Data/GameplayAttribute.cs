@@ -1,8 +1,14 @@
-﻿namespace Waddle.GameplayAttributes.Data
+﻿using Unity.Entities;
+using Unity.NetCode;
+
+namespace Waddle.GameplayAttributes.Data
 {
-    public struct GameplayAttribute
+    [GhostComponent]
+    public struct GameplayAttribute : IBufferElementData
     {
+        [GhostField]
         public float BaseValue;
+        [GhostField]
         public float CurrentValue;
     }
 }

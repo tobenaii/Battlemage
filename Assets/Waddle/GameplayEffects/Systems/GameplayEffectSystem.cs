@@ -3,7 +3,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Waddle.GameplayAttributes.Data;
-using Waddle.GameplayAttributes.Extensions;
 using Waddle.GameplayEffects.Data;
 
 namespace Waddle.GameplayEffects.Systems
@@ -98,12 +97,12 @@ namespace Waddle.GameplayEffects.Systems
                     _modificationsMap[key] = modifications;
                 }
             }
-            var attributeBufferLookup = SystemAPI.GetBufferLookup<GameplayAttributeMap>();
+            var attributeBufferLookup = SystemAPI.GetBufferLookup<GameplayAttribute>();
             foreach (var key in _keysToProcess)
             {
                 if (!key.IsPermanent) continue;
                 var modifications = _modificationsMap[key];
-                var attributeBuffer = attributeBufferLookup[key.Target].AsMap();
+                var attributeBuffer = attributeBufferLookup[key.Target];
                 var attribute = attributeBuffer[key.Attribute];
                 var newValue = (attribute.BaseValue + modifications.Additive) * (1 + modifications.Multiplicitive) /
                                (1 + modifications.Division);
@@ -117,7 +116,7 @@ namespace Waddle.GameplayEffects.Systems
                 if (key.IsPermanent) continue;
                 
                 var modifications = _modificationsMap[key];
-                var attributeBuffer = attributeBufferLookup[key.Target].AsMap();
+                var attributeBuffer = attributeBufferLookup[key.Target];
                 var attribute = attributeBuffer[key.Attribute];
                 var newValue = (attribute.BaseValue + modifications.Additive) * (1 + modifications.Multiplicitive) /
                                (1 + modifications.Division);

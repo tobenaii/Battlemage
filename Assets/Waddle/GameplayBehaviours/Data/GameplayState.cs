@@ -1,9 +1,9 @@
-using BovineLabs.Core.Extensions;
 using Unity.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Waddle.Utilities;
+using Waddle.EntitiesExtended;
+using Waddle.EntitiesExtended.Extensions;
 
 namespace Waddle.GameplayBehaviours.Data
 {

@@ -2,7 +2,6 @@
 using Unity.Entities;
 using Waddle.GameplayActions.Data;
 using Waddle.GameplayAttributes.Data;
-using Waddle.GameplayAttributes.Extensions;
 
 namespace Waddle.GameplayActions.Systems
 {
@@ -15,15 +14,15 @@ namespace Waddle.GameplayActions.Systems
         public void OnUpdate(ref SystemState state)
         {
             foreach (var (requirements, attributes, result) in SystemAPI
-                         .Query<DynamicBuffer<GameplayActionRequirement>, DynamicBuffer<GameplayAttributeMap>, RefRW<GameplayActionRequirementResult>>())
+                         .Query<DynamicBuffer<GameplayActionRequirement>, DynamicBuffer<GameplayAttribute>, RefRW<GameplayActionRequirementResult>>())
             {
-                var attributeMap = attributes.AsMap();
+                var requirementsRef = requirements;
                 for (var i = 0; i < requirements.Length; i++)
                 {
                     var requirement = requirements[i];
-                    var value = attributeMap[requirement.Attribute];
+                    var value = attributes[requirement.Attribute];
                     result.ValueRW.SetResult(i, value.CurrentValue >= requirement.Amount);
-                    requirements[i] = requirement;
+                    requirementsRef[i] = requirement;
                 }
             }
         }

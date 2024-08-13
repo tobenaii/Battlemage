@@ -1,9 +1,9 @@
 ﻿using Battlemage.GameplayBehaviours.Data.GameplayEvents;
-using BovineLabs.Core.Groups;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
+using Waddle.EntitiesExtended.Groups;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Extensions;
 

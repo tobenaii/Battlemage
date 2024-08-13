@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waddle.Utilities
+namespace Waddle.EntitiesExtended
 {
     /// <summary>
     /// Boolean backed by a byte, to allow for blitting (mem-copy)

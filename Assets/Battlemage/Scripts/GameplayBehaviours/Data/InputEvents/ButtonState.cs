@@ -1,5 +1,5 @@
 ﻿using Unity.NetCode;
-using Waddle.Utilities;
+using Waddle.EntitiesExtended;
 
 namespace Battlemage.GameplayBehaviours.Data.InputEvents
 {

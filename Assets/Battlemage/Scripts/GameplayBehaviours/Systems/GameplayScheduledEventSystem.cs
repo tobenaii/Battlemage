@@ -32,6 +32,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                          .WithAll<Simulate>()
                          .WithEntityAccess())
             {
+                var scheduledEventsRef = scheduledEvents;
                 for (var i = 0; i < scheduledEvents.Length; i++)
                 {
                     var scheduledEvent = scheduledEvents[i];
@@ -47,7 +48,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                     }
 
                     scheduledEvent.Countdown -= deltaTime;
-                    scheduledEvents[i] = scheduledEvent;
+                    scheduledEventsRef[i] = scheduledEvent;
                 }
             }
 

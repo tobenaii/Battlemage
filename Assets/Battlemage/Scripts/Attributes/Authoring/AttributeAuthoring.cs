@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Battlemage.Attributes.Data;
-using BovineLabs.Core.Iterators;
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
@@ -36,14 +35,12 @@ namespace Battlemage.Attributes.Authoring
             public override void Bake(AttributeAuthoring authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
-                var buffer = AddBuffer<GameplayAttributeMap>(entity);
+                var buffer = AddBuffer<GameplayAttribute>(entity);
                 var count = authoring._attributes.Count;
-                buffer.InitializeHashMap<GameplayAttributeMap, byte, GameplayAttribute>(count, 5);
-                var attributeMap = buffer.AsHashMap<GameplayAttributeMap, byte, GameplayAttribute>();
                 foreach (var attribute in authoring._attributes)
                 {
                     var defaultValue = attribute.Value;
-                    attributeMap.TryAdd((byte)attribute.Attribute, new GameplayAttribute()
+                    buffer.Add(new GameplayAttribute()
                     {
                         BaseValue = defaultValue,
                         CurrentValue = defaultValue

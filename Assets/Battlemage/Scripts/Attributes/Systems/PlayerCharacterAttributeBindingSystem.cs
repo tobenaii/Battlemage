@@ -1,5 +1,4 @@
 ﻿using Battlemage.Player.Data;
-using BovineLabs.Core.Iterators;
 using Unity.Entities;
 using Waddle.GameplayAttributes.Data;
 
@@ -24,13 +23,11 @@ namespace Battlemage.Attributes.Systems
         {
             var attributeBindings = SystemAPI.GetSingletonBuffer<PlayerCharacterAttributeBinding>(true);
             var localCharacter = SystemAPI.GetSingletonEntity<PlayerCharacterTag>();
-            var attributeMap = SystemAPI.GetBuffer<GameplayAttributeMap>(localCharacter).AsHashMap<GameplayAttributeMap, byte, GameplayAttribute>();
+            var attributes = SystemAPI.GetBuffer<GameplayAttribute>(localCharacter);
             foreach (var attributeBinding in attributeBindings)
             {
-                if (attributeMap.TryGetValue(attributeBinding.Attribute, out var attributeValue))
-                {
-                    attributeBinding.Binding.Value.Value = attributeValue.CurrentValue;
-                }
+                var attributeValue = attributes[attributeBinding.Attribute];
+                attributeBinding.Binding.Value.Value = attributeValue.CurrentValue;
             }
         }
     }
