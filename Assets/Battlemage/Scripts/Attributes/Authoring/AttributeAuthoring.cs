@@ -36,7 +36,6 @@ namespace Battlemage.Attributes.Authoring
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var buffer = AddBuffer<GameplayAttribute>(entity);
-                var count = authoring._attributes.Count;
                 foreach (var attribute in authoring._attributes)
                 {
                     var defaultValue = attribute.Value;
