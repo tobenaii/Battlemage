@@ -9,6 +9,7 @@ using System.Reflection;
 using Sirenix.Serialization;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Localization;
+using UnityEngine.Localization;
 using UnityEngine.Localization.Metadata;
 using UnityEngine.Localization.Tables;
 
@@ -20,24 +21,30 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Internal
 		public const string METADATA_COLLECTION__ITEMS__PATH = "m_Items";
 		public const string TABLE_ENTRY__DATA__PATH = "Data";
 
-		public static PropertyInfo TableEntry_Data_Property;
-		public static PropertyInfo AssetTableEntry_Data_Property;
-		public static PropertyInfo StringTableEntry_Data_Property;
+		public static readonly bool HasAPIForCustomUndo = false;
 
-		public static FieldInfo TableEntryData_m_Metadata_Field;
-		public static FieldInfo MetadataCollection_m_Items_Field;
+		public static readonly PropertyInfo TableEntry_Data_Property;
+		public static readonly PropertyInfo AssetTableEntry_Data_Property;
+		public static readonly PropertyInfo StringTableEntry_Data_Property;
 
-		public static PropertyInfo LocalizationEditorSettings_Instance;
-		public static MethodInfo LocalizationEditorSettings_GetAddressableAssetSettings;
-		public static MethodInfo LocalizationEditorSettings_IsTableNameValid;
+		public static readonly FieldInfo TableEntryData_m_Metadata_Field;
+		public static readonly FieldInfo MetadataCollection_m_Items_Field;
 
-		public static MethodInfo RaiseTableEntryModified_Method;
-		public static MethodInfo RaiseTableEntryAdded_Method;
-		public static MethodInfo RaiseTableEntryRemoved_Method;
-		public static MethodInfo RaiseAssetTableEntryAdded_Method;
-		public static MethodInfo RaiseAssetTableEntryRemoved_Method;
-		public static MethodInfo AssetTableCollection_SetEntryAssetType_PrivateMethod;
-		public static MethodInfo AssetTableCollection_RemoveEntryAssetType_PrivateMethod;
+		public static readonly PropertyInfo LocalizationEditorSettings_Instance;
+		public static readonly MethodInfo LocalizationEditorSettings_GetAddressableAssetSettings;
+		public static readonly MethodInfo LocalizationEditorSettings_IsTableNameValid;
+
+		public static readonly MethodInfo RaiseTableEntryModified_Method;
+		public static readonly MethodInfo RaiseTableEntryAdded_Method;
+		public static readonly MethodInfo RaiseTableEntryRemoved_Method;
+		public static readonly MethodInfo RaiseAssetTableEntryAdded_Method;
+		public static readonly MethodInfo RaiseAssetTableEntryRemoved_Method;
+		public static readonly MethodInfo AssetTableCollection_SetEntryAssetType_PrivateMethod;
+		public static readonly MethodInfo AssetTableCollection_RemoveEntryAssetType_PrivateMethod;
+
+		public static readonly Type AddressHelper;
+		public static readonly MethodInfo FormatAssetLabelMethod;
+		public static readonly MethodInfo UpdateAssetGroupMethod;
 
 		private const BindingFlags INSTANCE_ALL = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 		private const BindingFlags INSTANCE_NON_PUBLIC = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -53,7 +60,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Internal
 
 			Type tableEntryDataType = TwoWaySerializationBinder.Default.BindToType("UnityEngine.Localization.Tables.TableEntryData, Unity.Localization");
 
-			TableEntryData_m_Metadata_Field = tableEntryDataType.GetField(TABLE_ENTRY_DATA__METADATA__PATH, INSTANCE_ALL);
+			TableEntryData_m_Metadata_Field = tableEntryDataType?.GetField(TABLE_ENTRY_DATA__METADATA__PATH, INSTANCE_ALL);
 			MetadataCollection_m_Items_Field = typeof(MetadataCollection).GetField(METADATA_COLLECTION__ITEMS__PATH, INSTANCE_ALL);
 
 			LocalizationEditorSettings_Instance = typeof(LocalizationEditorSettings).GetProperty("Instance", STATIC_NON_PUBLIC);
@@ -70,10 +77,37 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Internal
 			AssetTableCollection_SetEntryAssetType_PrivateMethod = typeof(AssetTableCollection).GetMethod("SetEntryAssetType", INSTANCE_NON_PUBLIC);
 			AssetTableCollection_RemoveEntryAssetType_PrivateMethod = typeof(AssetTableCollection).GetMethod("RemoveEntryAssetType", INSTANCE_NON_PUBLIC);
 
-			LocalizationEditorSettings_GetAddressableAssetSettingsFunc =
-				(Func<bool, AddressableAssetSettings>) Delegate.CreateDelegate(typeof(Func<bool, AddressableAssetSettings>),
-																									LocalizationEditorSettings_Instance.GetValue(null),
-																									LocalizationEditorSettings_GetAddressableAssetSettings);
+			if (LocalizationEditorSettings_Instance != null && LocalizationEditorSettings_GetAddressableAssetSettings != null)
+			{
+				LocalizationEditorSettings_GetAddressableAssetSettingsFunc =
+					(Func<bool, AddressableAssetSettings>) Delegate.CreateDelegate(typeof(Func<bool, AddressableAssetSettings>),
+																										LocalizationEditorSettings_Instance.GetValue(null),
+																										LocalizationEditorSettings_GetAddressableAssetSettings);
+			}
+
+			AddressHelper = TwoWaySerializationBinder.Default.BindToType("UnityEngine.Localization.AddressHelper");
+
+			FormatAssetLabelMethod = AddressHelper?.GetMethod("FormatAssetLabel",
+																			  BindingFlags.Static | BindingFlags.Public,
+																			  null,
+																			  new[] {typeof(LocaleIdentifier)},
+																			  null);
+
+			UpdateAssetGroupMethod = typeof(AssetTableCollection).GetMethod("UpdateAssetGroup",
+																								 BindingFlags.Instance | BindingFlags.NonPublic,
+																								 null,
+																								 new[]
+																								 {
+																									 typeof(AddressableAssetSettings),
+																									 typeof(AddressableAssetEntry),
+																									 typeof(bool)
+																								 },
+																								 null);
+
+			HasAPIForCustomUndo = AddressHelper != null &&
+										 FormatAssetLabelMethod != null &&
+										 UpdateAssetGroupMethod != null &&
+										 LocalizationEditorSettings_GetAddressableAssetSettingsFunc != null;
 		}
 
 		public static Action<SharedTableData.SharedTableEntry> Create_RaiseTableEntryModified_Method_Delegate(LocalizationEditorEvents events)

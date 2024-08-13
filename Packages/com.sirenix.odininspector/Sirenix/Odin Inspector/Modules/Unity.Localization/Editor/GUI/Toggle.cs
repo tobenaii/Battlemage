@@ -7,28 +7,32 @@
 using Sirenix.OdinInspector.Editor.Internal;
 using UnityEngine;
 
-public class Toggle
+namespace Sirenix.OdinInspector.Modules.Localization.Editor
 {
-    public string Label;
-    public float StartXMin;
-    public float StartXMax;
-    public Color StartColor;
-    public Rect CurrentThumbRect;
-    public Color CurrentColor;
-    public bool Enabled;
-    public SirenixAnimationUtility.InterpolatedFloat T1 = new SirenixAnimationUtility.InterpolatedFloat { Destination = 1f };
-    public SirenixAnimationUtility.InterpolatedFloat T2 = new SirenixAnimationUtility.InterpolatedFloat { Destination = 1f };
-    
-    private bool _toggled;
-    public bool Toggled
+    public class Toggle
     {
-        get => this._toggled;
-        set
+        public string Label;
+        public float StartXMin;
+        public float StartXMax;
+        public Color StartColor;
+        public Rect CurrentThumbRect;
+        public Color CurrentColor;
+        public bool Enabled;
+        public SirenixAnimationUtility.InterpolatedFloat T1 = new SirenixAnimationUtility.InterpolatedFloat {Destination = 1f};
+        public SirenixAnimationUtility.InterpolatedFloat T2 = new SirenixAnimationUtility.InterpolatedFloat {Destination = 1f};
+
+        private bool _toggled;
+
+        public bool Toggled
         {
-            this._toggled = value;
-            this.StartXMin = this.CurrentThumbRect.xMin;
-            this.StartXMax = this.CurrentThumbRect.xMax;
-            this.StartColor = this.CurrentColor;
+            get => this._toggled;
+            set
+            {
+                this._toggled = value;
+                this.StartXMin = this.CurrentThumbRect.xMin;
+                this.StartXMax = this.CurrentThumbRect.xMax;
+                this.StartColor = this.CurrentColor;
+            }
         }
     }
 }

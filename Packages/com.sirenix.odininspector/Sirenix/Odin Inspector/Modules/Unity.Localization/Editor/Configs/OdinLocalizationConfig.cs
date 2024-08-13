@@ -6,6 +6,7 @@
 
 using System;
 using Sirenix.OdinInspector.Editor;
+using Sirenix.OdinInspector.Modules.Localization.Editor.Internal;
 using Sirenix.Reflection.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
@@ -110,8 +111,6 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Configs
 			public static implicit operator Color(ThemeColor color) => color.Color;
 		}
 
-		public bool recordUndosForAssetTableEntries = true;
-
 		[ShowInInspector]
 		[BoxGroup("User Interface")]
 		[Range(96, 1024)]
@@ -143,6 +142,12 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Configs
 		[Range(0.5f, 5.0f)]
 		public float mouseDragSpeed = 1.0f;
 
+		[InfoBox("We couldn't find the necessary methods/classes to perform custom undo operations, therefore this option has been disabled and will be considered false even if true.",
+					VisibleIf = "@!OdinLocalizationReflectionValues.HasAPIForCustomUndo")]
+		[EnableIf("@OdinLocalizationReflectionValues.HasAPIForCustomUndo")]
+		[BoxGroup("Undo")]
+		public bool useCustomUndoHandlingForAssetCollections = true;
+
 		[Button(ButtonSizes.Large)]
 		public void Reset()
 		{
@@ -151,7 +156,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor.Configs
 				return;
 			}
 
-			this.recordUndosForAssetTableEntries = true;
+			this.useCustomUndoHandlingForAssetCollections = OdinLocalizationReflectionValues.HasAPIForCustomUndo;
 
 			this.assetRowHeight = 128;
 

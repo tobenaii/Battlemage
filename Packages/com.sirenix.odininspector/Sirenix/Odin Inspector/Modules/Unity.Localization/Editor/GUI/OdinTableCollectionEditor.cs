@@ -11,10 +11,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.OdinInspector.Editor.Internal;
 using Sirenix.OdinInspector.Modules.Localization.Editor.Configs;
 using Sirenix.OdinInspector.Modules.Localization.Editor.Internal;
+using Sirenix.Serialization;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
@@ -38,6 +40,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 																										  where TTable : LocalizationTable
 																										  where TEntry : TableEntry
 	{
+		public const int SELECTOR_ID = Int32.MinValue + 14085;
+		
 		internal struct DragInfo
 		{
 			public static DragInfo None => new DragInfo {Index = -1};
@@ -689,7 +693,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				this.exceptionMsg = $"There could be multiple other tables facing the same issue in '{this.Collection.name}', " +
 										  "this can potentially be resolved by refreshing the Addressables.";
 
-				GUIUtility.ExitGUI();
+				GUIHelper.ExitGUI(false);
 			}
 		}
 		
@@ -1048,14 +1052,14 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 
 			if (isMouseOverKeyRect)
 			{
-				GUI.Label(copyKeyIdRect, GUIHelper.TempContent(string.Empty, sharedEntry.Id.ToString()));
+				GUI.Label(copyKeyIdRect, GUIHelper.TempContent(string.Empty, "Copy Shared Entry Id"));
 			}
 
 			if (Event.current.OnMouseDown(copyKeyIdRect, 0))
 			{
 				this.RelatedWindow.ShowToast(ToastPosition.BottomLeft,
 													  SdfIconType.Clipboard,
-													  $"Copied Key ID '{sharedEntry.Id}' to the clipboard.",
+													  $"Copied Shared Entry Id '{sharedEntry.Id}' to the clipboard.",
 													  new Color(0.23f, 0.36f, 0.68f),
 													  8.0f);
 
@@ -1274,6 +1278,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				Rect pinRect = columnHeaderRect.TakeFromRight(30).SubXMax(10).AlignMiddle(18);
 				SdfIconType pinIcon = table.IsPinned ? SdfIconType.PinAngleFill : SdfIconType.PinAngle;
 
+				GUI.Label(pinRect, GUIHelper.TempContent(string.Empty, "Pin Table"));
+
 				if (Event.current.IsMouseOver(pinRect))
 				{
 					SdfIcons.DrawIcon(pinRect, pinIcon, Color.white);
@@ -1352,6 +1358,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				{
 					SdfIcons.DrawIcon(sortRect, sortIcon);
 				}
+
+				GUI.Label(sortRect, GUIHelper.TempContent(string.Empty, "Sort Table"));
 
 				if (Event.current.OnMouseDown(sortRect, 0))
 				{
@@ -1631,12 +1639,17 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 			Rect topDropRect = position.AlignTop(halfHeight);
 			Rect bottomDropRect = position.AlignBottom(halfHeight);
 
+			int topId = this.DragDropIdHint + indexTo;
+			
 			DragInfo topValue = DragAndDropUtilities.DropZone(topDropRect, DragInfo.None, this.DragDropIdHint + indexTo);
-			DragInfo bottomValue = DragAndDropUtilities.DropZone(bottomDropRect, DragInfo.None, this.DragDropIdHint + indexTo + this.SharedEntries.Length);
 
-			if (DragAndDropUtilities.CurrentDragId != 0 && Event.current.button == 0)
+			int bottomId = this.DragDropIdHint + indexTo + this.SharedEntries.Length;
+
+			DragInfo bottomValue = DragAndDropUtilities.DropZone(bottomDropRect, DragInfo.None, bottomId);
+
+			if (DragAndDropUtilities.IsDragging)
 			{
-				if (Event.current.IsMouseOver(topDropRect))
+				if (DragAndDropUtilities.HoveringAcceptedDropZone == topId)
 				{
 					if (EditorGUIUtility.isProSkin)
 					{
@@ -1663,7 +1676,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					//EditorGUI.DrawRect(topDropRect.AlignTop(1), new Color(0, 1, 1, 0.5f));
 				}
 
-				if (Event.current.IsMouseOver(bottomDropRect))
+				if (DragAndDropUtilities.HoveringAcceptedDropZone == bottomId)
 				{
 					if (EditorGUIUtility.isProSkin)
 					{
@@ -1971,50 +1984,41 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 
 				bool hasAllLocales = projectLocales.Count == this.LocaleTableMap.Count;
 
-				if (hasAllLocales)
+				if (!hasAllLocales)
 				{
-					GUIHelper.PushGUIEnabled(false);
-				}
-
-				if (SirenixEditorGUI.Button("Add Missing Locales", ButtonSizes.Large))
-				{
-					for (var i = 0; i < projectLocales.Count; i++)
+					if (SirenixEditorGUI.Button("Add Missing Locales", ButtonSizes.Large))
 					{
-						Locale locale = projectLocales[i];
-
-						if (this.LocaleTableMap.ContainsKey(locale))
+						for (var i = 0; i < projectLocales.Count; i++)
 						{
-							continue;
-						}
+							Locale locale = projectLocales[i];
 
-						LocalizationTable table = this.Collection.GetTable(locale.Identifier);
+							if (this.LocaleTableMap.ContainsKey(locale))
+							{
+								continue;
+							}
 
-						if (table != null)
-						{
-							this.Collection.AddTable(table, true);
-						}
-						else
-						{
-							this.Collection.AddNewTable(locale.Identifier);
+							LocalizationTable table = this.Collection.GetTable(locale.Identifier);
+
+							if (table != null)
+							{
+								this.Collection.AddTable(table, true);
+							}
+							else
+							{
+								this.Collection.AddNewTable(locale.Identifier);
+							}
 						}
 					}
-				}
 
-				if (hasAllLocales)
-				{
-					GUIHelper.PopGUIEnabled();
+					GUILayout.Space(4);
+					SirenixEditorGUI.HorizontalLineSeparator();
+					GUILayout.Space(4);
 				}
-
-				GUILayout.Space(4);
-				SirenixEditorGUI.HorizontalLineSeparator();
-				GUILayout.Space(4);
 
 				const float LINE_HEIGHT = 20.0f;
 				const float LOCALE_SPACING = 2.0f;
 
-				this.localeTabScrollPosition =
-					GUILayout.BeginScrollView(
-						this.localeTabScrollPosition /*, GUILayoutOptions.MaxHeight(MAX_HEIGHT)*/);
+				this.localeTabScrollPosition = GUILayout.BeginScrollView(this.localeTabScrollPosition /*, GUILayoutOptions.MaxHeight(MAX_HEIGHT)*/);
 				{
 					var keyRect = GUILayoutUtility.GetRect(0, LINE_HEIGHT, GUILayoutOptions.ExpandWidth());
 					this.KeyTable.IsVisible = this.DrawLocaleToggle(ref keyRect, this.toggles[0], this.KeyTable);
@@ -2069,7 +2073,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 									Undo.ClearUndo(looseTable);
 									Undo.ClearUndo(this.Collection);
 									FancyColor.PopBlend();
-									GUIUtility.ExitGUI();
+									GUIHelper.ExitGUI(false);
 								}
 							}
 							else
@@ -2079,7 +2083,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 									this.Collection.AddNewTable(locale.Identifier);
 									Undo.ClearUndo(this.Collection);
 									FancyColor.PopBlend();
-									GUIUtility.ExitGUI();
+									GUIHelper.ExitGUI(false);
 								}
 							}
 
@@ -2112,7 +2116,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 									Undo.ClearUndo(table.Asset);
 									Undo.ClearUndo(this.Collection);
 									FancyColor.PopBlend();
-									GUIUtility.ExitGUI();
+									GUIHelper.ExitGUI(false);
 								}
 							}
 						}
@@ -2132,6 +2136,23 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					}
 				}
 				GUILayout.EndScrollView();
+
+				GUILayout.Space(4);
+				SirenixEditorGUI.HorizontalLineSeparator();
+				GUILayout.Space(4);
+
+				if (SirenixEditorGUI.Button("Manage Locales", ButtonSizes.Medium))
+				{
+					try
+					{
+						TwoWaySerializationBinder.Default.BindToType("UnityEditor.Localization.UI.LocaleGeneratorWindow, Unity.Localization.Editor")?
+							.GetMethod("ShowWindow", BindingFlags.Static | BindingFlags.Public)?.Invoke(null, null);
+					}
+					catch (NullReferenceException nullReferenceException)
+					{
+						Debug.LogError($"[Odin]: Failed to find LocaleGeneratorWindow.ShowWindow.\n{nullReferenceException.Message}");
+					}
+				}
 			}
 			GUILayout.EndArea();
 		}
@@ -2347,7 +2368,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					{
 						this.Collection.AddTable(looseTable, createUndo: true);
 						FancyColor.PopBlend();
-						GUIUtility.ExitGUI();
+						GUIHelper.ExitGUI(false);
 					}
 				}
 				else
@@ -2356,7 +2377,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					{
 						this.Collection.AddNewTable(locale.Identifier);
 						FancyColor.PopBlend();
-						GUIUtility.ExitGUI();
+						GUIHelper.ExitGUI(false);
 					}
 				}
 
@@ -2399,7 +2420,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				{
 					this.Collection.RemoveTable(table.Asset, createUndo: true);
 					FancyColor.PopBlend();
-					GUIUtility.ExitGUI();
+					GUIHelper.ExitGUI(false);
 				}
 			}
 
@@ -2420,7 +2441,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 			}
 		}
 
-		private bool IsDraggingAnything()
+		protected bool IsDraggingAnything()
 		{
 			if (this.EntryScrollView.IsDraggingMouse ||
 				 this.EntryScrollView.IsDraggingHorizontalScrollBar ||

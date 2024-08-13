@@ -353,6 +353,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					EditorUtility.SetDirty(entry.Table);
 				}
 			}
+
+			GUI.Label(smartToggleRect, GUIHelper.TempContent(string.Empty, "Toggle Smart String"));
 		}
 
 		protected override void MeasureAllEntries()

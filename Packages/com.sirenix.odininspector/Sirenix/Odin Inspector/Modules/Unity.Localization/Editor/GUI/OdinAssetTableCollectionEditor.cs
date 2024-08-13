@@ -7,6 +7,7 @@
 #define USING_WIDTH_NON_PERCENT
 
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.OdinInspector.Editor.Internal;
@@ -15,6 +16,7 @@ using Sirenix.OdinInspector.Modules.Localization.Editor.Internal;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Localization;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
@@ -228,6 +230,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 
 		private void DrawEntries(ref OdinGUIScrollView.VisibleItems visibleItems, bool pinned)
 		{
+			bool isDraggingControls = this.IsDraggingAnything();
+
 			for (var i = 0; i < visibleItems.Length; i++)
 			{
 				if (!visibleItems.HasAssociatedData(i))
@@ -321,7 +325,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 
 							isCellPressed = DrawCell(entryRect, isEven);
 
-							this.DrawEntry(entryRect, sharedEntry, entry, table);
+							this.DrawEntry(entryRect, sharedEntry, entry, table, isDraggingControls);
 
 							if (isSelected)
 							{
@@ -340,13 +344,44 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 								this.SelectEntry(entry);
 							}
 
+							if (isSelected && Event.current.type == EventType.KeyDown && EditorWindow.focusedWindow == this.RelatedWindow)
+							{
+								switch (Event.current.keyCode)
+								{
+									case KeyCode.Delete:
+									case KeyCode.Backspace:
+										if (entry == null)
+										{
+											break;
+										}
+
+										this.AssignObjectToSharedEntry(sharedEntry, table.Asset, null);
+
+										Event.current.Use();
+										break;
+
+									case KeyCode.Space:
+									case KeyCode.Return:
+										if (entry == null)
+										{
+											entry = table.Asset.AddEntry(sharedEntry.Id, string.Empty);
+										}
+
+										this.ShowObjectPickerForEntry(entry);
+
+										Event.current.Use();
+										break;
+								}
+							}
+
 							break;
 					}
 				}
 			}
 		}
 
-		private void DrawEntry(Rect rect, SharedTableData.SharedTableEntry sharedEntry, AssetTableEntry entry, OdinGUITable<AssetTable> table)
+		private void DrawEntry(Rect rect, SharedTableData.SharedTableEntry sharedEntry, AssetTableEntry entry, OdinGUITable<AssetTable> table,
+									  bool isDraggingControls)
 		{
 			UnityEngine.Object asset = null;
 
@@ -356,6 +391,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 			{
 				asset = OdinLocalizationAssetCache.Get(entry.Guid, entryAssetType);
 			}
+
+			Rect fullRect = rect;
 
 			Rect rightMenuRect = rect.TakeFromRight(OdinLocalizationConstants.ROW_MENU_WIDTH);
 			rect.TakeFromLeft(OdinLocalizationConstants.ROW_MENU_WIDTH);
@@ -367,6 +404,40 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 
 			bool isMouseOverInspector = Event.current.IsMouseOver(openInspectorRect);
 			bool isMouseOverExplorer = Event.current.IsMouseOver(openExplorerRect);
+
+			// TODO: some caveats to just adding this
+#if true
+			var dragAndDropId = 0;
+
+			if (!isDraggingControls && !(asset is DefaultAsset))
+			{
+				EditorGUI.BeginChangeCheck();
+
+				var dropValue = DragAndDropUtilities.DragAndDropZone(fullRect, asset, entryAssetType, true, false, false) as UnityEngine.Object;
+
+				dragAndDropId = DragAndDropUtilities.PrevDragAndDropId;
+
+				if (EditorGUI.EndChangeCheck() && dropValue != asset)
+				{
+					if (!(dropValue is DefaultAsset))
+					{
+						entry = this.AssignObjectToSharedEntry(sharedEntry, table.Asset, dropValue);
+
+						asset = dropValue;
+
+						entryAssetType = this.Collection.GetEntryAssetType(sharedEntry.Id);
+					}
+					else
+					{
+						this.RelatedWindow.ShowToast(ToastPosition.BottomLeft,
+															  SdfIconType.ExclamationTriangleFill,
+															  "Default Assets (such as Folders) cannot be used for Asset Entries.",
+															  SirenixGUIStyles.RedErrorColor,
+															  10.0f);
+					}
+				}
+			}
+#endif
 
 			bool hasThumbnail = EditorGUIUtility.HasObjectThumbnail(entryAssetType);
 
@@ -402,6 +473,9 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					SdfIcons.DrawIcon(openInspectorRect, SdfIconType.PencilFill, c);
 					SdfIcons.DrawIcon(openExplorerRect, SdfIconType.FolderFill, c1);
 
+					GUI.Label(openInspectorRect, GUIHelper.TempContent(string.Empty, "Inspect Object"));
+					GUI.Label(openExplorerRect, GUIHelper.TempContent(string.Empty, "Show In Explorer"));
+
 					if (Event.current.OnMouseDown(openInspectorRect, 0))
 					{
 						GUIHelper.OpenInspectorWindow(asset);
@@ -411,7 +485,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					{
 						string assetAbsPath = Path.GetFullPath(AssetDatabase.GetAssetPath(asset));
 
-						if (File.Exists(assetAbsPath))
+						if (Directory.Exists(assetAbsPath) || File.Exists(assetAbsPath))
 						{
 							EditorUtility.RevealInFinder(assetAbsPath);
 
@@ -433,7 +507,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 						}
 
 						FancyColor.PopBlend();
-						GUIUtility.ExitGUI();
+						GUIHelper.ExitGUI(false);
 					}
 				}
 			}
@@ -514,6 +588,9 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				SdfIcons.DrawIcon(openInspectorRect, SdfIconType.PencilFill, c);
 				SdfIcons.DrawIcon(openExplorerRect, SdfIconType.FolderFill, c1);
 
+				GUI.Label(openInspectorRect, GUIHelper.TempContent(string.Empty, "Inspect Object"));
+				GUI.Label(openExplorerRect, GUIHelper.TempContent(string.Empty, "Show In Explorer"));
+
 				if (Event.current.OnMouseDown(openInspectorRect, 0))
 				{
 					GUIHelper.OpenInspectorWindow(asset);
@@ -523,7 +600,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				{
 					string assetAbsPath = Path.GetFullPath(AssetDatabase.GetAssetPath(asset));
 
-					if (File.Exists(assetAbsPath))
+					if (Directory.Exists(assetAbsPath) || File.Exists(assetAbsPath))
 					{
 						EditorUtility.RevealInFinder(assetAbsPath);
 
@@ -545,11 +622,13 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 					}
 
 					FancyColor.PopBlend();
-					GUIUtility.ExitGUI();
+					GUIHelper.ExitGUI(false);
 				}
 			}
 
-			if (OdinLocalizationGUI.ObjectPickerButton(rightMenuRect.AlignMiddle(14)))
+			Rect pickerRect = rightMenuRect.AlignMiddle(14);
+
+			if (OdinLocalizationGUI.ObjectPickerButton(pickerRect))
 			{
 				if (entry == null)
 				{
@@ -558,6 +637,15 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				
 				this.ShowObjectPickerForEntry(entry);
 			}
+
+			GUI.Label(pickerRect, GUIHelper.TempContent(string.Empty, "Select Object"));
+
+#if true
+			if (!isDraggingControls && dragAndDropId != 0 && DragAndDropUtilities.IsDragging && DragAndDropUtilities.HoveringAcceptedDropZone == dragAndDropId)
+			{
+				GUI.DrawTexture(fullRect, Texture2D.whiteTexture, ScaleMode.StretchToFill, false, 1, new Color(0, 0.5f, 0.8f, 0.25f), 0, 2.5f);
+			}
+#endif
 		}
 
 		public override void RemoveKey(SharedTableData.SharedTableEntry sharedEntry)
@@ -635,7 +723,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 				obj = asset;
 			}
 
-			SirenixObjectPickerUtilities.ShowObjectPicker(obj, objType, false, string.Empty, this.RelatedWindowId);
+			OdinObjectSelector.Show(this.RelatedWindow, OdinObjectSelectorIds.LOCALIZATION_EDITOR, obj, objType, false);
+			//SirenixObjectPickerUtilities.ShowObjectPicker(obj, objType, false, string.Empty, this.RelatedWindowId);
 		}
 
 		private void HandleObjectPickerUpdates()
@@ -644,7 +733,60 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 			{
 				return;
 			}
-			
+
+#if true
+			object selectedObj = OdinObjectSelector.SelectorObject;
+
+			try
+			{
+				if (OdinObjectSelector.IsReadyToClaim(this.RelatedWindow, OdinObjectSelectorIds.LOCALIZATION_EDITOR))
+				{
+					object claimedObject = OdinObjectSelector.Claim();
+
+					if (!(claimedObject is DefaultAsset))
+					{
+						this.AssignObjectToSelectorEntry(claimedObject as UnityEngine.Object);
+					}
+					else
+					{
+						this.RelatedWindow.ShowToast(ToastPosition.BottomLeft,
+															  SdfIconType.ExclamationTriangleFill,
+															  "Default Assets (such as Folders) cannot be used for Asset Entries.",
+															  SirenixGUIStyles.RedErrorColor,
+															  10.0f);
+					}
+
+					Event.current.Use();
+				}
+				else
+				{
+					if (!OdinObjectSelector.IsOpen)
+					{
+						this.pickedEntry.Guid = this.pickedEntryOriginalGuid;
+						this.pickedEntry = null;
+						this.pickedEntryOriginalGuid = string.Empty;
+					}
+
+					EditorGUI.BeginChangeCheck();
+					var changedValue = OdinObjectSelector.GetChangedObject<UnityEngine.Object>(null, this.RelatedWindow, OdinObjectSelectorIds.LOCALIZATION_EDITOR);
+					if (EditorGUI.EndChangeCheck())
+					{
+						if (changedValue == null)
+						{
+							this.pickedEntry.Guid = string.Empty;
+						}
+						else
+						{
+							this.pickedEntry.Guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(changedValue));
+						}
+					}
+				}
+			}
+			catch (NullReferenceException exception)
+			{
+				Debug.LogError($"{nameof(NullReferenceException)}: The asset '{selectedObj ?? "<ASSET NOT FOUND>"}' is NULL.\n{exception}");
+			}
+#else
 			if (Event.current.type != EventType.ExecuteCommand ||
 				 EditorGUIUtility.GetObjectPickerControlID() != this.RelatedWindowId ||
 				 this.RelatedWindowId == 0)
@@ -712,6 +854,161 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 			{
 				// NOTE: edge cases for when the user selects assets that appear in the object picker, but in reality are null.
 				Debug.LogError($"{nameof(NullReferenceException)}: The asset '{(selectedObj == null ? "<ASSET NOT FOUND>" : selectedObj.name)}' is NULL.\n{exception}");
+			}
+#endif
+		}
+
+		// TODO: implement when drag'n'drop areas are done and keyboard commands
+#if true
+		private AssetTableEntry AssignObjectToSharedEntry(SharedTableData.SharedTableEntry sharedEntry, AssetTable table, UnityEngine.Object obj)
+		{
+			Vector2 lastScrollPosition = this.EntryScrollView.Position;
+
+			AssetTableEntry entry;
+
+			if (obj == null)
+			{
+				this.CustomRemoveAssetFromTable(table, sharedEntry.Id, true);
+
+				entry = table.GetEntry(sharedEntry.Id) ?? table.AddEntry(sharedEntry.Id, string.Empty);
+			}
+			else
+			{
+				this.Collection.AddAssetToTable(table, sharedEntry.Id, obj, true);
+
+				entry = table.GetEntry(sharedEntry.Id);
+			}
+
+			this.EntryScrollView.Position = lastScrollPosition;
+
+			return entry;
+		}
+#endif
+
+		private void AssignObjectToSelectorEntry(UnityEngine.Object obj)
+		{
+			object selectedObj = OdinObjectSelector.SelectorObject;
+
+			try
+			{
+				Vector2 lastScrollPosition = this.EntryScrollView.Position;
+
+				this.pickedEntry.Guid = this.pickedEntryOriginalGuid;
+
+				var table = (AssetTable) this.pickedEntry.Table;
+
+				SharedTableData.SharedTableEntry sharedEntry = this.pickedEntry.SharedEntry;
+
+				if (obj == null)
+				{
+					this.CustomRemoveAssetFromTable((AssetTable) this.pickedEntry.Table, this.pickedEntry.SharedEntry.Id, true);
+
+					this.pickedEntry = table.GetEntry(sharedEntry.Id) ?? table.AddEntry(sharedEntry.Id, string.Empty);
+				}
+				else
+				{
+					this.Collection.AddAssetToTable((AssetTable) this.pickedEntry.Table, this.pickedEntry.SharedEntry.Id, obj, true);
+
+					this.pickedEntry = table.GetEntry(sharedEntry.Id);
+				}
+
+				EditorUtility.SetDirty(this.Collection.SharedData);
+				EditorUtility.SetDirty(table);
+
+				this.EntryScrollView.Position = lastScrollPosition;
+
+				this.pickedEntry = null;
+				this.pickedEntryOriginalGuid = string.Empty;
+			}
+			catch (NullReferenceException exception)
+			{
+				Debug.LogError($"{nameof(NullReferenceException)}: The asset '{selectedObj ?? "<ASSET NOT FOUND>"}' is NULL.\n{exception}");
+			}
+		}
+
+		public void CustomRemoveAssetFromTable(AssetTable table, TableEntryReference entryReference, bool createUndo = false)
+		{
+			if (!OdinLocalizationReflectionValues.HasAPIForCustomUndo || !OdinLocalizationConfig.Instance.useCustomUndoHandlingForAssetCollections)
+			{
+				this.Collection.RemoveAssetFromTable(table, entryReference, createUndo);
+
+				return;
+			}
+
+			var groupIndex = 0;
+
+			if (createUndo)
+			{
+				groupIndex = Undo.GetCurrentGroup();
+				Undo.IncrementCurrentGroup();
+				Undo.SetCurrentGroupName("Remove asset from table");
+			}
+
+			if (createUndo)
+			{
+				Undo.RecordObjects(new UnityEngine.Object[] {table, table.SharedData}, "Remove asset from table");
+			}
+
+			AssetTableEntry tableEntry = table.GetEntryFromReference(entryReference);
+
+			if (tableEntry == null)
+			{
+				return;
+			}
+
+			string removedAssetGuid = tableEntry.Guid;
+
+			tableEntry.Guid = string.Empty;
+
+			AddressableAssetSettings addressableAssetSettings = OdinLocalizationEditorSettings.GetAddressableAssetSettings(false);
+
+			if (addressableAssetSettings == null)
+			{
+				return;
+			}
+
+			EditorUtility.SetDirty(table);
+			EditorUtility.SetDirty(table.SharedData);
+
+			this.SetEntryAssetType(tableEntry, null);
+
+			if (tableEntry.MetadataEntries.Count == 0)
+			{
+				table.RemoveEntry(tableEntry.KeyId);
+			}
+
+			ReadOnlyCollection<AssetTableCollection> assetTableCollections = LocalizationEditorSettings.GetAssetTableCollections();
+
+			foreach (AssetTableCollection collection in assetTableCollections)
+			{
+				if (collection.GetTable(table.LocaleIdentifier) is AssetTable tableWithMatchingLocaleId &&
+					 tableWithMatchingLocaleId.ContainsValue(removedAssetGuid))
+				{
+					return;
+				}
+			}
+
+			AddressableAssetEntry assetEntry = addressableAssetSettings.FindAssetEntry(removedAssetGuid);
+
+			if (assetEntry != null)
+			{
+				if (createUndo)
+				{
+					Undo.RecordObject(assetEntry.parentGroup, "Remove asset from table");
+				}
+
+				var assetLabel = (string) OdinLocalizationReflectionValues.FormatAssetLabelMethod.Invoke(null, new object[] {table.LocaleIdentifier});
+
+				assetEntry.SetLabel(assetLabel, false);
+
+				OdinLocalizationReflectionValues.UpdateAssetGroupMethod.Invoke(this.Collection, new object[] {addressableAssetSettings, assetEntry, createUndo});
+			}
+
+			OdinLocalizationEvents.RaiseAssetTableEntryRemoved(this.Collection, table, tableEntry, removedAssetGuid);
+
+			if (createUndo)
+			{
+				Undo.CollapseUndoOperations(groupIndex);
 			}
 		}
 	}

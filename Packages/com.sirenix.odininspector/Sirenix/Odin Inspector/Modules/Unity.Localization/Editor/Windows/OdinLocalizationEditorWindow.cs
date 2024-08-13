@@ -153,8 +153,16 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 		[Button]
 		public void LocaleGenerator()
 		{
-			TwoWaySerializationBinder.Default.BindToType("UnityEditor.Localization.UI.LocaleGeneratorWindow, Unity.Localization.Editor")
-											 .GetMethod("ShowWindow", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
+			try
+			{
+				TwoWaySerializationBinder.Default.BindToType("UnityEditor.Localization.UI.LocaleGeneratorWindow, Unity.Localization.Editor")
+												 .GetMethod("ShowWindow", BindingFlags.Static | BindingFlags.Public)
+												 .Invoke(null, null);
+			}
+			catch (NullReferenceException nullReferenceException)
+			{
+				Debug.LogError($"[Odin]: Failed to find LocaleGeneratorWindow.ShowWindow.\n{nullReferenceException.Message}");
+			}
 		}
 
 		[HorizontalGroup("Split/Right/Split")]
@@ -276,7 +284,7 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 			public RightMenuTopTabs CurrentTopTab;
 			public RightMenuBottomTabs CurrentBottomTab;
 			public PropertyTree MetadataTree = null;
-			public bool ShowSharedMetadata;
+			public bool ShowSharedMetadata = true;
 
 			public float LeftMenuWidth;
 			public float RightMenuWidth;
@@ -293,8 +301,8 @@ namespace Sirenix.OdinInspector.Modules.Localization.Editor
 
 			public void Load()
 			{
-				this.LeftMenuWidth = EditorPrefs.GetFloat($"{EditorPrefsKey}_LeftMenuWidth");
-				this.RightMenuWidth = EditorPrefs.GetFloat($"{EditorPrefsKey}_RightMenuWidth");
+				this.LeftMenuWidth = EditorPrefs.GetFloat($"{EditorPrefsKey}_LeftMenuWidth", 300);
+				this.RightMenuWidth = EditorPrefs.GetFloat($"{EditorPrefsKey}_RightMenuWidth", 300);
 				this.RightMenuTopPanelHeight = EditorPrefs.GetFloat($"{EditorPrefsKey}_RightMenuTopHeight");
 				this.LastOpenRightMenuWidth = EditorPrefs.GetFloat($"{EditorPrefsKey}_LastOpenRightMenuWidth");
 			}
