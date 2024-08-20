@@ -1,9 +1,10 @@
-﻿using Unity.Entities;
+﻿using System;
+using Unity.Entities;
 
 namespace Waddle.GameplayBehaviours.Data
 {
-    public struct GameplayEventPointer : IBufferElementData
+    public struct GameplayEventPointer
     {
-        public long Pointer;
+        public IntPtr Pointer;
     }
 }

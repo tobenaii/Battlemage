@@ -1,11 +1,12 @@
 ﻿using System;
 using Unity.Burst;
 using Unity.Entities;
+using UnityEngine.Scripting;
 
 namespace Waddle.GameplayBehaviours.Data
 {
     [AttributeUsage(AttributeTargets.Struct)]
-    public class GameplayEventDefinitionAttribute : BurstCompileAttribute
+    public class GameplayEventDefinitionAttribute : Attribute
     {
         public Type DelegateType { get; }
         public GameplayEventDefinitionAttribute(Type delegateType)
@@ -15,7 +16,7 @@ namespace Waddle.GameplayBehaviours.Data
     }
     
     [AttributeUsage(AttributeTargets.Method)]
-    public class GameplayEventAttribute : Attribute
+    public class GameplayEventAttribute : PreserveAttribute
     {
         public ComponentType GameplayEventType { get; }
         

@@ -12,20 +12,12 @@ using Waddle.GameplayBehaviours.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
-    [BurstCompile]
     [UpdateInGroup(typeof(GameplayEventsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayVariableInputEventSystem : ISystem
     {
-        public void OnCreate(ref SystemState state)
-        {
-            state.RequireForUpdate<GameplayEventPointer>();
-        }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
             
@@ -43,14 +35,14 @@ namespace Battlemage.GameplayBehaviours.Systems
                     float2 lookDelta;
                     lookDelta.x = NetworkInputUtilities.GetInputDelta(currentTickInputs.LookInputDelta.x, previousTickInputs.LookInputDelta.x);
                     lookDelta.y = NetworkInputUtilities.GetInputDelta(currentTickInputs.LookInputDelta.y, previousTickInputs.LookInputDelta.y);
-                    var lookPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputLookEvent>().StableTypeHash);
+                    var lookPointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputLookEvent>().StableTypeHash);
                     new FunctionPointer<InputLookEvent.Delegate>(lookPointer).Invoke(ref gameplayState, ref source, ref lookDelta);
                 }
 
                 if (SystemAPI.HasComponent<InputPrimaryAbilityEvent>(entity))
                 {
                     var primaryAbilityInput = inputs.ValueRO.PrimaryAbility;
-                    var primaryAbilityPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputPrimaryAbilityEvent>().StableTypeHash);
+                    var primaryAbilityPointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputPrimaryAbilityEvent>().StableTypeHash);
                     new FunctionPointer<InputPrimaryAbilityEvent.Delegate>(primaryAbilityPointer).Invoke(ref gameplayState, ref source, ref primaryAbilityInput);
                 }
             }
@@ -60,22 +52,15 @@ namespace Battlemage.GameplayBehaviours.Systems
         }
     }
 
-    [BurstCompile]
     [UpdateInGroup(typeof(PredictedFixedStepSimulationSystemGroup), OrderFirst = true)]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayFixedInputEventSystem : ISystem
     {
-        public void OnCreate(ref SystemState state)
-        {
-            state.RequireForUpdate<GameplayEventPointer>();
-        }
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
-            var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
 
             foreach (var (eventRefs, inputs, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>>()
@@ -86,7 +71,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                 var source = entity;
                 if (SystemAPI.HasComponent<InputJumpEvent>(entity))
                 {
-                    var jumpPointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputJumpEvent>().StableTypeHash);
+                    var jumpPointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputJumpEvent>().StableTypeHash);
                     var jumpInput = inputs.ValueRO.Jump;
                     new FunctionPointer<InputJumpEvent.Delegate>(jumpPointer).Invoke(ref gameplayState, ref source, ref jumpInput);
                 }
@@ -94,7 +79,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                 if (SystemAPI.HasComponent<InputMoveEvent>(entity))
                 {
                     var moveInput = inputs.ValueRO.MoveInput;
-                    var movePointer = eventRefs.GetEventPointer(eventPointers, TypeManager.GetTypeInfo<InputMoveEvent>().StableTypeHash);
+                    var movePointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputMoveEvent>().StableTypeHash);
                     new FunctionPointer<InputMoveEvent.Delegate>(movePointer).Invoke(ref gameplayState, ref source, ref moveInput);
                 }
             }

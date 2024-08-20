@@ -7,7 +7,7 @@ using Waddle.EntitiesExtended.Extensions;
 
 namespace Waddle.GameplayBehaviours.Data
 {
-    public ref struct GameplayState
+    public struct GameplayState
     {
         private EntityManager _entityManager;
         private EntityCommandBuffer _ecb;
@@ -26,6 +26,11 @@ namespace Waddle.GameplayBehaviours.Data
         }
 
         public T GetComponent<T>(Entity entity) where T : unmanaged, IComponentData
+        {
+            return _entityManager.GetComponentData<T>(entity);
+        }
+
+        public T GetComponentManaged<T>(Entity entity) where T : class, IComponentData, new()
         {
             return _entityManager.GetComponentData<T>(entity);
         }

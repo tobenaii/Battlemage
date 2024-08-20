@@ -32,7 +32,7 @@ namespace Waddle.GameplayAbilities.Systems
             {
                 IsServer = state.WorldUnmanaged.IsServer(),
                 NetworkTime = networkTime,
-                ECB = SystemAPI.GetSingletonRW<BeginSimulationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged),
+                ECB = SystemAPI.GetSingletonRW<BeginInitializationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged),
                 LocalTransformLookup = localTransformLookup,
                 ParentLookup = parentLookup,
                 PostTransformMatrixLookup = postTransformMatrixLookup

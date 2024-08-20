@@ -1,11 +1,11 @@
 ﻿using Unity.Entities;
 using Unity.NetCode;
+using Waddle.EntitiesExtended.Groups;
 using Waddle.GameplayEffects.Data;
 
 namespace Waddle.GameplayEffects.Systems
 {
-    [UpdateInGroup(typeof(InitializationSystemGroup), OrderLast = true)]
-    [CreateAfter(typeof(DefaultVariantSystemGroup))]
+    [UpdateInGroup(typeof(BeginSimulationSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayEffectSetupSystem : ISystem
     {

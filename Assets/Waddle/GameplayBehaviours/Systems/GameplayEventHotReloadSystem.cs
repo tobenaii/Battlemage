@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
@@ -13,10 +14,8 @@ using Unity.Entities;
 using Unity.NetCode;
 using UnityEditor;
 using UnityEngine;
-using Waddle.GameplayBehaviour.Utilities;
-using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
-using Hash128 = Unity.Entities.Hash128;
+using Waddle.GameplayBehaviours.Extensions;
 
 namespace Waddle.GameplayBehaviours.Systems
 {
@@ -24,7 +23,7 @@ namespace Waddle.GameplayBehaviours.Systems
     public partial class GameplayEventHotReloadSystem : SystemBase
     {
         private FileSystemWatcher _watcher;
-        private Dictionary<Hash128, List<MethodInfo>> _methodInfos = new();
+        private Dictionary<int, List<MethodInfo>> _methodInfos = new();
         
         protected override void OnStartRunning()
         {
@@ -47,28 +46,31 @@ namespace Waddle.GameplayBehaviours.Systems
             {
                 return;
             }
-            
-            var monoHash = new Hash128((uint)monoScript.GetClass().GetHashCode(), 0, 0, 0);
-            if (!_methodInfos.TryGetValue(monoHash, out var prevMethodInfos))
+
+            var gameplayBehaviourHash = monoScript.GetClass().GetHashCode();
+            if (!_methodInfos.TryGetValue(gameplayBehaviourHash, out var prevMethodInfos))
             {
-                prevMethodInfos = monoScript.GetClass().GetMethods(BindingFlags.Static | BindingFlags.NonPublic).ToList();
+                prevMethodInfos = monoScript.GetClass()
+                    .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                    .Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null)
+                    .ToList();
             }
             
-            var availableEvents = new List<(ComponentType type, Hash128 hash, Delegate eventDelegate)>();
-            
-            var methodInfos = CompileEvents(monoScript).ToList();
+            var availableEvents = new List<(ComponentType type, ulong eventHash, Delegate eventDelegate)>();
+            var eventSetupDataBuffer = SystemAPI.GetSingletonBuffer<GameplayEventSetupData>();
+            var methodInfos = CompileEvents(monoScript).Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null).ToList();
             
             foreach (var methodInfo in methodInfos)
             {
                 var attribute = methodInfo.GetCustomAttribute<GameplayEventAttribute>();
                 var delegateType = attribute.GameplayEventType.GetManagedType().GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
-                var eventHash = GameplayBehaviourUtilities.GetEventHash(monoScript.GetClass(), attribute.GameplayEventType, methodInfo);
+                var eventHash = TypeManager.GetTypeInfo(attribute.GameplayEventType.TypeIndex).StableTypeHash;
                 var eventDelegate = Delegate.CreateDelegate(delegateType, methodInfo);
                 availableEvents.Add((attribute.GameplayEventType, eventHash, eventDelegate));
                 var newPointer = Marshal.GetFunctionPointerForDelegate(eventDelegate);
                 
-                var eventIndex = GameplayBehaviourUtilities.GetEventPointerIndex(EntityManager, monoScript.GetClass(), methodInfo);
-                GameplayBehaviourUtilities.SetEventPointerByIndex(EntityManager, eventIndex, newPointer);
+                var eventPointer = eventSetupDataBuffer.GetEventPointer(monoScript.GetClass(), attribute.GameplayEventType);
+                eventPointer.Value.Pointer = newPointer;
             }
             
             var addedEvents = availableEvents
@@ -83,7 +85,7 @@ namespace Waddle.GameplayBehaviours.Systems
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             foreach (var (behaviourHash, entity) in SystemAPI.Query<GameplayBehaviourHash>().WithEntityAccess().WithOptions(EntityQueryOptions.IncludePrefab))
             {
-                if (behaviourHash.Value != monoHash)
+                if (behaviourHash.Value != gameplayBehaviourHash)
                 {
                     continue;
                 }
@@ -110,7 +112,7 @@ namespace Waddle.GameplayBehaviours.Systems
             
             ecb.Playback(EntityManager);
             ecb.Dispose();
-            _methodInfos[monoHash] = methodInfos;
+            _methodInfos[gameplayBehaviourHash] = methodInfos;
             Debug.Log($"Reloaded {(World.IsServer() ? "server" : "client")} gameplay events: {monoScript.name}");
         }
         

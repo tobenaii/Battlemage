@@ -1,5 +1,4 @@
-﻿using System;
-using Battlemage.GameplayBehaviours.Data.GameplayEvents;
+﻿using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -11,22 +10,18 @@ using Waddle.GameplayBehaviours.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
-    [BurstCompile]
     [UpdateInGroup(typeof(GameplayEventsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayOnHitEventSystem : ISystem
     {
         private NativeList<DistanceHit> _hits;
         
-        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<PhysicsWorldSingleton>();
-            state.RequireForUpdate<GameplayEventPointer>();
             _hits = new NativeList<DistanceHit>(Allocator.Persistent);
         }
         
-        [BurstCompile]
         public void OnDestroy(ref SystemState state)
         {
             if (_hits.IsCreated)
@@ -35,11 +30,9 @@ namespace Battlemage.GameplayBehaviours.Systems
             }
         }
 
-        [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        public unsafe void OnUpdate(ref SystemState state)
         {
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
-            var eventPointers = SystemAPI.GetSingletonBuffer<GameplayEventPointer>();
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
             foreach (var (onHitEvents, localTransform, entity) in
@@ -56,9 +49,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                         var hit = _hits[0];
                         var self = entity;
                         var target = hit.Entity;
-                        var pointer = new IntPtr(eventPointers[onHitEvent.EventIndex].Pointer);
-                        new FunctionPointer<GameplayOnHitEvent.Delegate>(pointer).Invoke(ref gameplayState, ref self,
-                            ref target);
+                        new FunctionPointer<GameplayOnHitEvent.Delegate>(onHitEvent.EventBlob.Value.Pointer).Invoke(ref gameplayState, ref self, ref target);
                     }
                 }
             }

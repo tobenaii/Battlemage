@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Waddle.GameplayBehaviours.Data;
 
@@ -7,26 +8,22 @@ namespace Waddle.GameplayBehaviours.Extensions
 {
     public static class GameplayEventReferenceExtensions
     {
-        public static IntPtr GetEventPointer(this DynamicBuffer<GameplayEventReference> buffer, DynamicBuffer<GameplayEventPointer> pointers, GameplayEventHash eventHash)
+        public static IntPtr GetEventPointer(this DynamicBuffer<GameplayEventReference> buffer, ulong eventHash)
         {
-            return GetEventPointer(buffer, pointers, eventHash.TypeHash, eventHash.MethodHash);
-        }
-        
-        public static IntPtr GetEventPointer(this DynamicBuffer<GameplayEventReference> buffer, DynamicBuffer<GameplayEventPointer> pointers, ulong typeHash, int methodHash = 0)
-        {
-            return new IntPtr(pointers[GetEventIndex(buffer, typeHash, methodHash)].Pointer);
-        }
-        
-        public static byte GetEventIndex(this DynamicBuffer<GameplayEventReference> buffer, ulong typeHash, int methodHash = 0)
-        {
-            foreach (var element in buffer)
+            foreach (var eventReference in buffer)
             {
-                if (element.EventHash.TypeHash == typeHash && element.EventHash.MethodHash == methodHash)
-                {
-                    return element.Index;
-                }
+                if (eventReference.EventHash == eventHash) return eventReference.Pointer.Value.Pointer;
             }
-            throw new KeyNotFoundException($"Couldn't find event pointer for hash: {typeHash}-{methodHash}");
+            throw new KeyNotFoundException("Could not find event pointer for hash: " + eventHash);
+        }
+        
+        public static BlobAssetReference<GameplayEventPointer> GetEventPointerBlob(this DynamicBuffer<GameplayEventReference> buffer, ulong eventHash, FixedString32Bytes methodName)
+        {
+            foreach (var eventReference in buffer)
+            {
+                if (eventReference.EventHash == eventHash && eventReference.MethodName == methodName) return eventReference.Pointer;
+            }
+            throw new KeyNotFoundException($"Could not find event pointer for hash: {eventHash} and method name: {methodName}");
         }
     }
 }

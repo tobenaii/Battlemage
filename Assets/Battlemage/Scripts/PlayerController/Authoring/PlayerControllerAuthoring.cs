@@ -32,7 +32,7 @@ namespace Battlemage.PlayerController.Authoring
             }
         }
         
-        [GameplayEvent(typeof(InputJumpEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(InputJumpEvent.Delegate))]
+        [GameplayEvent(typeof(InputJumpEvent))]
         private static void OnJump(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
@@ -41,7 +41,7 @@ namespace Battlemage.PlayerController.Authoring
             state.SetComponent(character, characterCommands);
         }
         
-        [GameplayEvent(typeof(InputLookEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(InputLookEvent.Delegate))]
+        [GameplayEvent(typeof(InputLookEvent))]
         private static void OnLook(ref GameplayState state, ref Entity self, ref float2 value)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
@@ -50,7 +50,7 @@ namespace Battlemage.PlayerController.Authoring
             state.SetComponent(character, characterCommands);
         }
         
-        [GameplayEvent(typeof(InputMoveEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(InputMoveEvent.Delegate))]
+        [GameplayEvent(typeof(InputMoveEvent))]
         private static void OnMove(ref GameplayState state, ref Entity self, ref float2 value)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
@@ -65,7 +65,7 @@ namespace Battlemage.PlayerController.Authoring
             state.SetComponent(character, characterCommands);
         }
 
-        [GameplayEvent(typeof(InputPrimaryAbilityEvent)), BurstCompile, Preserve, MonoPInvokeCallback(typeof(InputPrimaryAbilityEvent.Delegate))]
+        [GameplayEvent(typeof(InputPrimaryAbilityEvent))]
         private static void OnPrimaryAbility(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
         {
             if (buttonState.WasPressed.IsSet)

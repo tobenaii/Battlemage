@@ -3,7 +3,6 @@ using ParrelSync;
 #endif
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
 
 // Create a custom bootstrap, which enables auto-connect.
 // The bootstrap can also be used to configure other settings as well as to

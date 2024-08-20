@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.Collections;
@@ -20,61 +19,51 @@ namespace Waddle.GameplayBehaviours.Authoring
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var gameplayBehaviour = GetComponent<GameplayBehaviour>();
-                AddComponent(entity, new GameplayBehaviourHash()
-                {
-                    Value = new Hash128(
-                        (uint)gameplayBehaviour.GetType().GetHashCode(), 0, 0, 0)
-                });
-
+                var gameplayEvents = AddBuffer<GameplayEventReference>(entity);
                 var methods = gameplayBehaviour.GetType()
                     .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null);
-                var fullGameplayEventRefs = AddBuffer<FullGameplayEventReference>(entity);
-                var addedComponents = new List<ComponentType>();
                 
-                foreach (var method in methods.Where(x => !x.Name.Contains("$BurstManaged")))
+                foreach (var method in methods)
                 {
                     var attribute = method.GetCustomAttribute<GameplayEventAttribute>();
-                    var delegateType = attribute.GameplayEventType.GetManagedType()
-                        .GetCustomAttribute<GameplayEventDefinitionAttribute>().DelegateType;
-                    var eventDelegate = Delegate.CreateDelegate(delegateType, method);
                     var componentType = attribute.GameplayEventType;
-
-                    AddGameplayEvent(entity, gameplayBehaviour.GetType(), componentType, eventDelegate, fullGameplayEventRefs, addedComponents);
+                    AddGameplayEvent(entity, gameplayBehaviour.GetType(), method, componentType, gameplayEvents);
                 }
 
                 AddBuffer<GameplayActionRequirement>(entity);
+                AddComponent(entity, new GameplayBehaviourHash()
+                {
+                    Value = authoring.GetType().GetHashCode()
+                });
             }
 
-            private void AddGameplayEvent(Entity entity, Type behaviourType,
-                ComponentType componentType, Delegate eventDelegate,
-                DynamicBuffer<FullGameplayEventReference> fullGameplayEventRefs, List<ComponentType> addedComponents)
+            private void AddGameplayEvent(Entity entity, Type gameplayType, MethodInfo methodInfo,
+                ComponentType componentType, DynamicBuffer<GameplayEventReference> gameplayEvents)
             {
-                var eventInfoEntity = CreateAdditionalEntity(TransformUsageFlags.None, true);
-                AddComponent(eventInfoEntity, new GameplayEventInfo
-                {
-                    AssemblyQualifiedName = behaviourType.AssemblyQualifiedName,
-                    MethodName = eventDelegate.Method.Name,
-                });
+                AddComponent(entity, componentType);
 
-                if (!addedComponents.Contains(componentType))
+                var blobHash = new Hash128(
+                    (uint)gameplayType.FullName!.GetHashCode(),
+                    (uint)TypeManager.GetTypeInfo(componentType.TypeIndex).StableTypeHash.GetHashCode(),
+                    0,
+                    0);
+
+                if (!TryGetBlobAssetReference<GameplayEventPointer>(blobHash, out var blobReference))
                 {
-                    AddComponent(entity, componentType);
-                    addedComponents.Add(componentType);
+                    var builder = new BlobBuilder(Allocator.Temp);
+                    ref var eventPointer = ref builder.ConstructRoot<GameplayEventPointer>();
+                    eventPointer.Pointer = methodInfo.MethodHandle.GetFunctionPointer();
+                    blobReference = builder.CreateBlobAssetReference<GameplayEventPointer>(Allocator.Persistent);
+                    builder.Dispose();
+                    AddBlobAssetWithCustomHash(ref blobReference, blobHash);
                 }
-
-                var typeHash = TypeManager.GetTypeInfo(componentType.TypeIndex).StableTypeHash;
-                var methodHash = componentType.IsBuffer ? new FixedString64Bytes(eventDelegate.Method.Name).GetHashCode() : 0;
                 
-                var fullHash = new Hash128(
-                    (uint)behaviourType.AssemblyQualifiedName!.GetHashCode(),
-                    (uint)eventDelegate.Method.Name.GetHashCode(), 0, 0);
-
-                fullGameplayEventRefs.Add(new FullGameplayEventReference()
+                gameplayEvents.Add(new GameplayEventReference()
                 {
-                    TypeHash = typeHash,
-                    MethodHash = methodHash,
-                    FullHash = fullHash
+                    EventHash = TypeManager.GetTypeInfo(componentType.TypeIndex).StableTypeHash,
+                    MethodName = methodInfo.Name,
+                    Pointer = blobReference
                 });
             }
         }
