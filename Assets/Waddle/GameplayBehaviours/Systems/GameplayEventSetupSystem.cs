@@ -4,7 +4,6 @@ using System.Reflection;
 using Unity.Entities;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Extensions;
-using WaitForSeconds = UnityEngine.WaitForSeconds;
 
 namespace Waddle.GameplayBehaviours.Systems
 {

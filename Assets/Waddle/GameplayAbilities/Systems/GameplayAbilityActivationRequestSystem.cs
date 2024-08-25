@@ -6,6 +6,7 @@ using Unity.Transforms;
 using Waddle.GameplayAbilities.Data;
 using Waddle.GameplayActions.Data;
 using Waddle.GameplayActions.Systems;
+using Waddle.GameplayLifecycle.Systems;
 
 namespace Waddle.GameplayAbilities.Systems
 {
@@ -32,7 +33,7 @@ namespace Waddle.GameplayAbilities.Systems
             {
                 IsServer = state.WorldUnmanaged.IsServer(),
                 NetworkTime = networkTime,
-                ECB = SystemAPI.GetSingletonRW<BeginInitializationEntityCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged),
+                ECB = SystemAPI.GetSingletonRW<InstantiateCommandBufferSystem.Singleton>().ValueRW.CreateCommandBuffer(state.WorldUnmanaged),
                 LocalTransformLookup = localTransformLookup,
                 ParentLookup = parentLookup,
                 PostTransformMatrixLookup = postTransformMatrixLookup

@@ -2,13 +2,13 @@
 using Battlemage.Networking.Utilities;
 using Battlemage.PlayerController.Data;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Extensions;
 using Waddle.GameplayBehaviours.Systems;
+using Waddle.GameplayLifecycle.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
@@ -18,8 +18,9 @@ namespace Battlemage.GameplayBehaviours.Systems
     {
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
-            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
+            var instantiateEcb = SystemAPI.GetSingletonRW<InstantiateCommandBufferSystem.Singleton>().ValueRW
+                .CreateCommandBuffer(state.WorldUnmanaged);
+            var gameplayState = new GameplayState(state.EntityManager, instantiateEcb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
             
             foreach (var (eventRefs, inputs, inputCommands, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>, DynamicBuffer<InputBufferData<PlayerCharacterInputs>>>()
@@ -46,9 +47,6 @@ namespace Battlemage.GameplayBehaviours.Systems
                     new FunctionPointer<InputPrimaryAbilityEvent.Delegate>(primaryAbilityPointer).Invoke(gameplayState, source, primaryAbilityInput);
                 }
             }
-            
-            ecb.Playback(state.EntityManager);
-            ecb.Dispose();
         }
     }
 
@@ -59,8 +57,9 @@ namespace Battlemage.GameplayBehaviours.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
-            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
+            var instantiateEcb = SystemAPI.GetSingletonRW<InstantiateCommandBufferSystem.Singleton>().ValueRW
+                .CreateCommandBuffer(state.WorldUnmanaged);            
+            var gameplayState = new GameplayState(state.EntityManager, instantiateEcb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
 
             foreach (var (eventRefs, inputs, entity) in SystemAPI
                          .Query<DynamicBuffer<GameplayEventReference>, RefRO<PlayerCharacterInputs>>()
@@ -83,9 +82,6 @@ namespace Battlemage.GameplayBehaviours.Systems
                     new FunctionPointer<InputMoveEvent.Delegate>(movePointer).Invoke(gameplayState, source, moveInput);
                 }
             }
-
-            ecb.Playback(state.EntityManager);
-            ecb.Dispose();
         }
     }
 }

@@ -6,6 +6,7 @@ using Unity.Entities;
 using UnityEngine;
 using Waddle.GameplayActions.Data;
 using Waddle.GameplayBehaviours.Data;
+using Waddle.GameplayLifecycle.Data;
 using Hash128 = Unity.Entities.Hash128;
 
 namespace Waddle.GameplayBehaviours.Authoring
@@ -36,6 +37,9 @@ namespace Waddle.GameplayBehaviours.Authoring
                 {
                     Value = authoring.GetType().GetHashCode()
                 });
+                AddComponent(entity, new InitializeEntity());
+                AddComponent(entity, new DestroyEntity());
+                SetComponentEnabled<DestroyEntity>(entity, false);
             }
 
             private void AddGameplayEvent(Entity entity, Type gameplayType, MethodInfo methodInfo,

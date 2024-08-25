@@ -4,6 +4,7 @@ using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Battlemage.SimpleVelocity.Data;
 using Unity.Entities;
 using Unity.Transforms;
+using UnityEngine;
 using Waddle.GameplayAbilities.Data;
 using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
@@ -30,11 +31,12 @@ namespace Battlemage.Abilities.Authoring
         private static async void OnSpawn(GameplayState state, Entity self)
         {
             var transform = state.GetComponent<LocalTransform>(self);
-            transform.Position += transform.Forward(); 
-            var velocity = new Velocity { Value = transform.Forward() * 20.0f };
-            await state.WaitForSeconds(2);
-            state.SetComponent(self, velocity);
+            transform.Position += transform.Forward();
             state.SetComponent(self, transform);
+            await state.WaitForSeconds(2);
+            Debug.Log(state.IsServer);
+            var velocity = new Velocity { Value = transform.Forward() * 20.0f };
+            state.SetComponent(self, velocity);
             GameplayOnHitEvent.AddOnHitCallback(state, self, 0.25f, OnHit);
         }
         

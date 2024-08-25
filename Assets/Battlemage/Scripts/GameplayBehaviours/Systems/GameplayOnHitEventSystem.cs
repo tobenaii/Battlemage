@@ -7,6 +7,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Systems;
+using Waddle.GameplayLifecycle.Systems;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
@@ -33,8 +34,9 @@ namespace Battlemage.GameplayBehaviours.Systems
         public void OnUpdate(ref SystemState state)
         {
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
-            var gameplayState = new GameplayState(state.EntityManager, ecb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
+            var instantiateEcb = SystemAPI.GetSingletonRW<InstantiateCommandBufferSystem.Singleton>().ValueRW
+                .CreateCommandBuffer(state.WorldUnmanaged);            
+            var gameplayState = new GameplayState(state.EntityManager, instantiateEcb, SystemAPI.Time, state.WorldUnmanaged.IsServer());
             foreach (var (onHitEvents, localTransform, entity) in
                      SystemAPI.Query<DynamicBuffer<GameplayOnHitEvent>, LocalTransform>()
                          .WithAll<Simulate>()
@@ -53,9 +55,6 @@ namespace Battlemage.GameplayBehaviours.Systems
                     }
                 }
             }
-
-            ecb.Playback(state.EntityManager);
-            ecb.Dispose();
         }
     }
 }

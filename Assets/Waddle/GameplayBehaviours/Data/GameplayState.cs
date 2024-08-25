@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Waddle.EntitiesExtended;
 using Waddle.EntitiesExtended.Extensions;
+using Waddle.GameplayLifecycle.Data;
 using Waddle.GameplayTasks;
 
 namespace Waddle.GameplayBehaviours.Data
@@ -11,17 +12,17 @@ namespace Waddle.GameplayBehaviours.Data
     public struct GameplayState
     {
         private EntityManager _entityManager;
-        private EntityCommandBuffer _ecb;
+        private EntityCommandBuffer _instantiateEcb;
         private readonly TimeData _time;
         private readonly BlittableBool _isServer;
 
         public TimeData Time => _time;
         public bool IsServer => _isServer;
         
-        public GameplayState(EntityManager entityManager, EntityCommandBuffer ecb, TimeData time, BlittableBool isServer)
+        public GameplayState(EntityManager entityManager, EntityCommandBuffer instantiateEcb, TimeData time, BlittableBool isServer)
         {
             _entityManager = entityManager;
-            _ecb = ecb;
+            _instantiateEcb = instantiateEcb;
             _time = time;
             _isServer = isServer;
         }
@@ -39,6 +40,11 @@ namespace Waddle.GameplayBehaviours.Data
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponentData
         {
             _entityManager.SetComponentData(entity, component);
+        }
+        
+        public void SetComponent<T>(TemporaryEntity temporaryEntity, T component) where T : unmanaged, IComponentData
+        {
+            _instantiateEcb.SetComponent(temporaryEntity.Entity, component);
         }
 
         public T GetSingleton<T>() where T : unmanaged, IComponentData
@@ -60,18 +66,23 @@ namespace Waddle.GameplayBehaviours.Data
         {
             return _entityManager.GetBuffer<T>(entity);
         }
-
-        public Entity Instantiate(Entity prefab)
+        
+        public DynamicBuffer<T> GetBuffer<T>(TemporaryEntity temporaryEntity) where T : unmanaged, IBufferElementData
         {
-            return _entityManager.Instantiate(prefab);
+            return _instantiateEcb.SetBuffer<T>(temporaryEntity.Entity);
+        }
+
+        public TemporaryEntity Instantiate(Entity prefab)
+        {
+            return new TemporaryEntity()
+            {
+                Entity = _instantiateEcb.Instantiate(prefab)
+            };
         }
         
         public void MarkForDestroy(Entity entity)
         {
-            if (_isServer)
-                _ecb.DestroyEntity(entity);
-            else
-                _ecb.SetEnabled(entity, false);
+            _entityManager.SetComponentEnabled<DestroyEntity>(entity, true);
         }
 
         public float3 GetForward(Entity entity)
