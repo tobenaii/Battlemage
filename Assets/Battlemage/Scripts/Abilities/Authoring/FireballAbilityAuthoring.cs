@@ -1,10 +1,9 @@
-﻿using System.Threading.Tasks;
-using Battlemage.Attributes.Data;
+﻿using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Battlemage.SimpleVelocity.Data;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
-using UnityEngine;
 using Waddle.GameplayAbilities.Data;
 using Waddle.GameplayBehaviours.Authoring;
 using Waddle.GameplayBehaviours.Data;
@@ -13,6 +12,7 @@ using Waddle.GameplayEffects.Extensions;
 
 namespace Battlemage.Abilities.Authoring
 {
+    [BurstCompile]
     public class FireballAbilityAuthoring : GameplayBehaviour
     {
         public class Baker : Baker<FireballAbilityAuthoring>
@@ -27,21 +27,21 @@ namespace Battlemage.Abilities.Authoring
             }
         }
         
-        [GameplayEvent(typeof(GameplayOnSpawnEvent))]
-        private static async void OnSpawn(GameplayState state, Entity self)
+        [GameplayEvent(typeof(GameplayOnSpawnEvent)), BurstCompile]
+        private static void OnSpawn(ref GameplayState state, ref Entity self)
         {
             var transform = state.GetComponent<LocalTransform>(self);
             transform.Position += transform.Forward();
             state.SetComponent(self, transform);
-            await state.WaitForSeconds(2);
-            Debug.Log(state.IsServer);
+            
             var velocity = new Velocity { Value = transform.Forward() * 20.0f };
             state.SetComponent(self, velocity);
-            GameplayOnHitEvent.AddOnHitCallback(state, self, 0.25f, OnHit);
+            
+            GameplayOnHitEvent.AddOnHitCallback(state, self, 0.25f, nameof(OnHit));
         }
         
-        [GameplayEvent(typeof(GameplayOnHitEvent))]
-        private static void OnHit(GameplayState state, Entity self, Entity target)
+        [GameplayEvent(typeof(GameplayOnHitEvent)), BurstCompile]
+        private static void OnHit(ref GameplayState state, ref Entity self, ref Entity target)
         {
             var abilityData = state.GetComponent<GameplayAbilityData>(self);
             if (target == abilityData.Source) return;
@@ -56,7 +56,7 @@ namespace Battlemage.Abilities.Authoring
         
         private static void DoExplode(ref GameplayState state, ref Entity self)
         {
-            state.MarkForDestroy(self);
+            state.Destroy(self);
         }
     }
 }

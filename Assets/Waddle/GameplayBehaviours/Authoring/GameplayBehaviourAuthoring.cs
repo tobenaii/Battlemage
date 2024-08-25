@@ -23,7 +23,7 @@ namespace Waddle.GameplayBehaviours.Authoring
                 var gameplayEvents = AddBuffer<GameplayEventReference>(entity);
                 var methods = gameplayBehaviour.GetType()
                     .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                    .Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null);
+                    .Where(x => x.GetCustomAttribute<GameplayEventAttribute>() != null && !x.Name.Contains("$BurstManaged"));
                 
                 foreach (var method in methods)
                 {

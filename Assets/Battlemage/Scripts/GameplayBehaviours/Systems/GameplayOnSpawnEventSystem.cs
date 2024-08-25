@@ -11,8 +11,10 @@ namespace Battlemage.GameplayBehaviours.Systems
 {
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
+    [BurstCompile]
     public partial struct GameplayOnSpawnEventSystem : ISystem
     {
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var instantiateEcb = SystemAPI.GetSingletonRW<InstantiateCommandBufferSystem.Singleton>().ValueRW
@@ -26,7 +28,7 @@ namespace Battlemage.GameplayBehaviours.Systems
             {
                 var source = entity;
                 var pointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<GameplayOnSpawnEvent>().StableTypeHash);
-                new FunctionPointer<GameplayOnSpawnEvent.Delegate>(pointer).Invoke(gameplayState, source);
+                new FunctionPointer<GameplayOnSpawnEvent.Delegate>(pointer).Invoke(ref gameplayState, ref source);
             }
         }
     }

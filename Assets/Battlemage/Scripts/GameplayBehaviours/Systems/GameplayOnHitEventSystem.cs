@@ -13,6 +13,7 @@ namespace Battlemage.GameplayBehaviours.Systems
 {
     [UpdateInGroup(typeof(GameplayEventsSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
+    [BurstCompile]
     public partial struct GameplayOnHitEventSystem : ISystem
     {
         private NativeList<DistanceHit> _hits;
@@ -31,6 +32,7 @@ namespace Battlemage.GameplayBehaviours.Systems
             }
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
@@ -51,7 +53,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                         var hit = _hits[0];
                         var self = entity;
                         var target = hit.Entity;
-                        new FunctionPointer<GameplayOnHitEvent.Delegate>(onHitEvent.EventBlob.Value.Pointer).Invoke(gameplayState, self, target);
+                        new FunctionPointer<GameplayOnHitEvent.Delegate>(onHitEvent.EventBlob.Value.Pointer).Invoke(ref gameplayState, ref self, ref target);
                     }
                 }
             }

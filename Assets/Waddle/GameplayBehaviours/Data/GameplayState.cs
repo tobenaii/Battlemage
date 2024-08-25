@@ -5,7 +5,6 @@ using Unity.Transforms;
 using Waddle.EntitiesExtended;
 using Waddle.EntitiesExtended.Extensions;
 using Waddle.GameplayLifecycle.Data;
-using Waddle.GameplayTasks;
 
 namespace Waddle.GameplayBehaviours.Data
 {
@@ -80,7 +79,7 @@ namespace Waddle.GameplayBehaviours.Data
             };
         }
         
-        public void MarkForDestroy(Entity entity)
+        public void Destroy(Entity entity)
         {
             _entityManager.SetComponentEnabled<DestroyEntity>(entity, true);
         }
@@ -93,11 +92,6 @@ namespace Waddle.GameplayBehaviours.Data
         public float3 GetRight(Entity entity)
         {
             return _entityManager.GetComponentData<LocalTransform>(entity).Right();
-        }
-
-        public GameplayTask WaitForSeconds(float seconds)
-        {
-            return new GameplayTask(this, seconds);
         }
     }
 }
