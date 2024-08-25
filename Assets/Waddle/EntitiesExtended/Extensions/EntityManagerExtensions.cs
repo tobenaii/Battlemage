@@ -18,6 +18,18 @@ namespace Waddle.EntitiesExtended.Extensions
 
             return query.GetSingleton<T>();
         }
+        
+        public static T GetSingletonManaged<T>(this EntityManager em, bool completeDependency = true)
+            where T : class, IComponentData, new()
+        {
+            using var query = new EntityQueryBuilder(Allocator.Temp).WithAll<T>().WithOptions(QueryOptions).Build(em);
+            if (completeDependency)
+            {
+                query.CompleteDependency();
+            }
+
+            return em.GetComponentData<T>(query.GetSingletonEntity());
+        }
 
         public static void SetSingleton<T>(this EntityManager em, T value, bool completeDependency = true)
             where T : unmanaged, IComponentData

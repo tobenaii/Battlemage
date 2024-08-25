@@ -1,4 +1,3 @@
-using AOT;
 using Battlemage.GameplayBehaviours.Data.InputEvents;
 using Battlemage.PlayerController.Data;
 using Unity.Burst;
@@ -33,7 +32,7 @@ namespace Battlemage.PlayerController.Authoring
         }
         
         [GameplayEvent(typeof(InputJumpEvent))]
-        private static void OnJump(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
+        private static void OnJump(GameplayState state, Entity self, ButtonState buttonState)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
             var characterCommands = state.GetComponent<FirstPersonCharacterControl>(character);
@@ -42,7 +41,7 @@ namespace Battlemage.PlayerController.Authoring
         }
         
         [GameplayEvent(typeof(InputLookEvent))]
-        private static void OnLook(ref GameplayState state, ref Entity self, ref float2 value)
+        private static void OnLook(GameplayState state, Entity self, float2 value)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
             var characterCommands = state.GetComponent<FirstPersonCharacterControl>(character);
@@ -51,7 +50,7 @@ namespace Battlemage.PlayerController.Authoring
         }
         
         [GameplayEvent(typeof(InputMoveEvent))]
-        private static void OnMove(ref GameplayState state, ref Entity self, ref float2 value)
+        private static void OnMove(GameplayState state, Entity self, float2 value)
         {
             var character = state.GetComponent<Data.PlayerController>(self).Character;
             var characterCommands = state.GetComponent<FirstPersonCharacterControl>(character);
@@ -66,7 +65,7 @@ namespace Battlemage.PlayerController.Authoring
         }
 
         [GameplayEvent(typeof(InputPrimaryAbilityEvent))]
-        private static void OnPrimaryAbility(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
+        private static void OnPrimaryAbility(GameplayState state, Entity self, ButtonState buttonState)
         {
             if (buttonState.WasPressed.IsSet)
             {

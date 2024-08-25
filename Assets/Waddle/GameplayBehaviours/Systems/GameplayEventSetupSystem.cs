@@ -4,6 +4,7 @@ using System.Reflection;
 using Unity.Entities;
 using Waddle.GameplayBehaviours.Data;
 using Waddle.GameplayBehaviours.Extensions;
+using WaitForSeconds = UnityEngine.WaitForSeconds;
 
 namespace Waddle.GameplayBehaviours.Systems
 {
@@ -14,6 +15,7 @@ namespace Waddle.GameplayBehaviours.Systems
         protected override void OnCreate()
         {
             RequireForUpdate<InitializeGameplayEvents>();
+            EntityManager.CreateSingleton(new WaitForSecondsBuffer());
         }
         
         protected override void OnUpdate()

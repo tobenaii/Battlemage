@@ -30,7 +30,7 @@ namespace Battlemage.GameplayBehaviours.Systems
             }
         }
 
-        public unsafe void OnUpdate(ref SystemState state)
+        public void OnUpdate(ref SystemState state)
         {
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             var ecb = new EntityCommandBuffer(Allocator.Temp);
@@ -49,7 +49,7 @@ namespace Battlemage.GameplayBehaviours.Systems
                         var hit = _hits[0];
                         var self = entity;
                         var target = hit.Entity;
-                        new FunctionPointer<GameplayOnHitEvent.Delegate>(onHitEvent.EventBlob.Value.Pointer).Invoke(ref gameplayState, ref self, ref target);
+                        new FunctionPointer<GameplayOnHitEvent.Delegate>(onHitEvent.EventBlob.Value.Pointer).Invoke(gameplayState, self, target);
                     }
                 }
             }

@@ -1,4 +1,4 @@
-﻿using AOT;
+﻿using System.Threading.Tasks;
 using Battlemage.Attributes.Data;
 using Battlemage.GameplayBehaviours.Data.GameplayEvents;
 using Battlemage.SimpleVelocity.Data;
@@ -27,20 +27,19 @@ namespace Battlemage.Abilities.Authoring
         }
         
         [GameplayEvent(typeof(GameplayOnSpawnEvent))]
-        private static void OnSpawn(ref GameplayState state, ref Entity self)
+        private static async void OnSpawn(GameplayState state, Entity self)
         {
             var transform = state.GetComponent<LocalTransform>(self);
             transform.Position += transform.Forward(); 
             var velocity = new Velocity { Value = transform.Forward() * 20.0f };
-
+            await state.WaitForSeconds(2);
             state.SetComponent(self, velocity);
             state.SetComponent(self, transform);
-            
             GameplayOnHitEvent.AddOnHitCallback(state, self, 0.25f, OnHit);
         }
         
         [GameplayEvent(typeof(GameplayOnHitEvent))]
-        private static void OnHit(ref GameplayState state, ref Entity self, ref Entity target)
+        private static void OnHit(GameplayState state, Entity self, Entity target)
         {
             var abilityData = state.GetComponent<GameplayAbilityData>(self);
             if (target == abilityData.Source) return;

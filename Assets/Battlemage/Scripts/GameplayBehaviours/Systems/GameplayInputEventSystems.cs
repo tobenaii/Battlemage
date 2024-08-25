@@ -36,14 +36,14 @@ namespace Battlemage.GameplayBehaviours.Systems
                     lookDelta.x = NetworkInputUtilities.GetInputDelta(currentTickInputs.LookInputDelta.x, previousTickInputs.LookInputDelta.x);
                     lookDelta.y = NetworkInputUtilities.GetInputDelta(currentTickInputs.LookInputDelta.y, previousTickInputs.LookInputDelta.y);
                     var lookPointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputLookEvent>().StableTypeHash);
-                    new FunctionPointer<InputLookEvent.Delegate>(lookPointer).Invoke(ref gameplayState, ref source, ref lookDelta);
+                    new FunctionPointer<InputLookEvent.Delegate>(lookPointer).Invoke(gameplayState, source, lookDelta);
                 }
 
                 if (SystemAPI.HasComponent<InputPrimaryAbilityEvent>(entity))
                 {
                     var primaryAbilityInput = inputs.ValueRO.PrimaryAbility;
                     var primaryAbilityPointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputPrimaryAbilityEvent>().StableTypeHash);
-                    new FunctionPointer<InputPrimaryAbilityEvent.Delegate>(primaryAbilityPointer).Invoke(ref gameplayState, ref source, ref primaryAbilityInput);
+                    new FunctionPointer<InputPrimaryAbilityEvent.Delegate>(primaryAbilityPointer).Invoke(gameplayState, source, primaryAbilityInput);
                 }
             }
             
@@ -73,14 +73,14 @@ namespace Battlemage.GameplayBehaviours.Systems
                 {
                     var jumpPointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputJumpEvent>().StableTypeHash);
                     var jumpInput = inputs.ValueRO.Jump;
-                    new FunctionPointer<InputJumpEvent.Delegate>(jumpPointer).Invoke(ref gameplayState, ref source, ref jumpInput);
+                    new FunctionPointer<InputJumpEvent.Delegate>(jumpPointer).Invoke(gameplayState, source, jumpInput);
                 }
 
                 if (SystemAPI.HasComponent<InputMoveEvent>(entity))
                 {
                     var moveInput = inputs.ValueRO.MoveInput;
                     var movePointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<InputMoveEvent>().StableTypeHash);
-                    new FunctionPointer<InputMoveEvent.Delegate>(movePointer).Invoke(ref gameplayState, ref source, ref moveInput);
+                    new FunctionPointer<InputMoveEvent.Delegate>(movePointer).Invoke(gameplayState, source, moveInput);
                 }
             }
 

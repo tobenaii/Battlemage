@@ -8,12 +8,11 @@ using Waddle.GameplayBehaviours.Extensions;
 
 namespace Battlemage.GameplayBehaviours.Systems
 {
-    [BurstCompile]
-    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateInGroup(typeof(InitializationSystemGroup), OrderFirst = true)]
+    [UpdateAfter(typeof(BeginInitializationEntityCommandBufferSystem))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     public partial struct GameplayOnSpawnEventSystem : ISystem
     {
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
@@ -26,7 +25,7 @@ namespace Battlemage.GameplayBehaviours.Systems
             {
                 var source = entity;
                 var pointer = eventRefs.GetEventPointer(TypeManager.GetTypeInfo<GameplayOnSpawnEvent>().StableTypeHash);
-                new FunctionPointer<GameplayOnSpawnEvent.Delegate>(pointer).Invoke(ref gameplayState, ref source);
+                new FunctionPointer<GameplayOnSpawnEvent.Delegate>(pointer).Invoke(gameplayState, source);
                 ecb.SetComponentEnabled<GameplayOnSpawnEvent>(entity, false);
             }
             ecb.Playback(state.EntityManager);

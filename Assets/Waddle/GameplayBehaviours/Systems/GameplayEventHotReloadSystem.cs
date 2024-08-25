@@ -94,7 +94,8 @@ namespace Waddle.GameplayBehaviours.Systems
                 {
                     if (!EntityManager.HasComponent(entity, gEvent.type))
                     {
-                        Debug.Log("Adding Component");
+                        var type = gEvent.type;
+                        Debug.Log("Adding Component: " + type.GetManagedType().Name);
                         ecb.AddComponent(entity, gEvent.type);
                     }
                 }

@@ -7,7 +7,7 @@ namespace Battlemage.GameplayBehaviours.Data.GameplayEvents
     [GameplayEventDefinition(typeof(Delegate))]
     public struct GameplayOnHitEvent : IBufferElementData
     {
-        public delegate void Delegate(ref GameplayState gameplayState, ref Entity source, ref Entity target);
+        public delegate void Delegate(GameplayState gameplayState, Entity source, Entity target);
         public BlobAssetReference<GameplayEventPointer> EventBlob;
         public float Radius;
         

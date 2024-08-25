@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Waddle.EntitiesExtended;
 using Waddle.EntitiesExtended.Extensions;
+using Waddle.GameplayTasks;
 
 namespace Waddle.GameplayBehaviours.Data
 {
@@ -44,6 +45,11 @@ namespace Waddle.GameplayBehaviours.Data
         {
             return _entityManager.GetSingleton<T>();
         }
+
+        public T GetSingletonManaged<T>() where T : class, IComponentData, new()
+        {
+            return _entityManager.GetSingletonManaged<T>();
+        }
         
         public DynamicBuffer<T> GetSingletonBuffer<T>() where T : unmanaged, IBufferElementData
         {
@@ -77,6 +83,10 @@ namespace Waddle.GameplayBehaviours.Data
         {
             return _entityManager.GetComponentData<LocalTransform>(entity).Right();
         }
-        
+
+        public GameplayTask WaitForSeconds(float seconds)
+        {
+            return new GameplayTask(this, seconds);
+        }
     }
 }
