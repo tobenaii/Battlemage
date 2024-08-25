@@ -33,11 +33,11 @@ namespace Battlemage.Abilities.Authoring
             var transform = state.GetComponent<LocalTransform>(self);
             transform.Position += transform.Forward();
             state.SetComponent(self, transform);
-            
             var velocity = new Velocity { Value = transform.Forward() * 20.0f };
             state.SetComponent(self, velocity);
             
             GameplayOnHitEvent.AddOnHitCallback(state, self, 0.25f, nameof(OnHit));
+            GameplayScheduledEvent.Schedule(state, self, 5.0f, nameof(DoExplode));
         }
         
         [GameplayEvent(typeof(GameplayOnHitEvent)), BurstCompile]
@@ -45,7 +45,7 @@ namespace Battlemage.Abilities.Authoring
         {
             var abilityData = state.GetComponent<GameplayAbilityData>(self);
             if (target == abilityData.Source) return;
-            state.CreateGameplayEffect()
+            GameplayEffectBuilder.Create(state)
                 .WithAttributeModifier(
                     (byte)BattlemageAttribute.Health,
                     GameplayAttributeModifier.Operation.Negate,
@@ -54,6 +54,7 @@ namespace Battlemage.Abilities.Authoring
             DoExplode(ref state, ref self);
         }
         
+        [GameplayEvent(typeof(GameplayScheduledEvent)), BurstCompile]
         private static void DoExplode(ref GameplayState state, ref Entity self)
         {
             state.Destroy(self);

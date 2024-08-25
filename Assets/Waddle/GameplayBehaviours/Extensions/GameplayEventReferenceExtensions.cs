@@ -25,5 +25,15 @@ namespace Waddle.GameplayBehaviours.Extensions
             }
             throw new KeyNotFoundException($"Could not find event pointer for hash: {eventHash} and method name: {methodName}");
         }
+        
+        public static int GetEventPointerBlobIndex(this DynamicBuffer<GameplayEventReference> buffer, ulong eventHash, FixedString32Bytes methodName)
+        {
+            for (var i = 0; i < buffer.Length; i++)
+            {
+                var eventReference = buffer[i];
+                if (eventReference.EventHash == eventHash && eventReference.MethodName == methodName) return i;
+            }
+            throw new KeyNotFoundException($"Could not find event pointer for hash: {eventHash} and method name: {methodName}");
+        }
     }
 }
