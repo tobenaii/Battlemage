@@ -6,6 +6,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.tobenai.waddle": {
+      "version": "file:com.tobenai.waddle",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.addressables": {
       "version": "2.2.2",
       "depth": 1,

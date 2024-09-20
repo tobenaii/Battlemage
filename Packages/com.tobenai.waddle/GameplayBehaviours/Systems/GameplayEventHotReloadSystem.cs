@@ -27,7 +27,7 @@ namespace Waddle.GameplayBehaviours.Systems
         
         protected override void OnStartRunning()
         {
-            _watcher = new FileSystemWatcher("Assets/Battlemage/Scripts/");
+            _watcher = new FileSystemWatcher("Assets/Scripts/");
             _watcher.IncludeSubdirectories = true;
             _watcher.NotifyFilter = NotifyFilters.LastWrite;
             _watcher.Changed += (e, args) => EditorApplication.delayCall += () => Reload(args.FullPath.Replace('\\', '/').Replace(Application.dataPath, "Assets"));
