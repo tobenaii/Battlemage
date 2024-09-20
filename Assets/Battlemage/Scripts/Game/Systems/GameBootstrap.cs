@@ -21,7 +21,7 @@ namespace Battlemage.Game.Systems
             
 #if UNITY_EDITOR
             var mppmTags = CurrentPlayer.ReadOnlyTags();
-            if (mppmTags.Contains("Server"))
+            if (!mppmTags.Contains("Client"))
             {
                 var serverWorld = CreateServerWorld("Server World");
                 var tickRate = new ClientServerTickRate();
