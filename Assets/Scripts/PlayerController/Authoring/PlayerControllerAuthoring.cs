@@ -1,15 +1,12 @@
-using Battlemage.GameplayBehaviours.Data.InputEvents;
-using Battlemage.PlayerController.Data;
+using Battlemage.GameplayBehaviours.InputEvents;
 using Unity.Burst;
 using Unity.CharacterController;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Scripting;
-using Waddle.FirstPersonCharacter.Data;
-using Waddle.GameplayAbilities.Extensions;
-using Waddle.GameplayBehaviours.Authoring;
-using Waddle.GameplayBehaviours.Data;
+using Waddle.Runtime.FirstPersonCharacter;
+using Waddle.Runtime.GameplayAbilities;
+using Waddle.Runtime.GameplayBehaviours;
 
 namespace Battlemage.PlayerController.Authoring
 {
@@ -23,7 +20,7 @@ namespace Battlemage.PlayerController.Authoring
             public override void Bake(PlayerControllerAuthoring authoring)
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
-                AddComponent(entity, new Data.PlayerController()
+                AddComponent(entity, new PlayerController()
                 {
                     PrimaryAbility = GetEntity(authoring._primaryAbilityPrefab, TransformUsageFlags.Dynamic)
                 });
@@ -34,7 +31,7 @@ namespace Battlemage.PlayerController.Authoring
         [GameplayEvent(typeof(InputJumpEvent)), BurstCompile]
         private static void OnJump(ref GameplayState state, ref Entity self, ref ButtonState buttonState)
         {
-            var character = state.GetComponent<Data.PlayerController>(self).Character;
+            var character = state.GetComponent<PlayerController>(self).Character;
             var characterCommands = state.GetComponent<FirstPersonCharacterControl>(character);
             characterCommands.Jump = buttonState.WasPressed.IsSet;
             state.SetComponent(character, characterCommands);
@@ -43,7 +40,7 @@ namespace Battlemage.PlayerController.Authoring
         [GameplayEvent(typeof(InputLookEvent)), BurstCompile]
         private static void OnLook(ref GameplayState state, ref Entity self, ref float2 value)
         {
-            var character = state.GetComponent<Data.PlayerController>(self).Character;
+            var character = state.GetComponent<PlayerController>(self).Character;
             var characterCommands = state.GetComponent<FirstPersonCharacterControl>(character);
             characterCommands.LookYawPitchDegrees = value;
             state.SetComponent(character, characterCommands);
@@ -52,7 +49,7 @@ namespace Battlemage.PlayerController.Authoring
         [GameplayEvent(typeof(InputMoveEvent)), BurstCompile]
         private static void OnMove(ref GameplayState state, ref Entity self, ref float2 value)
         {
-            var character = state.GetComponent<Data.PlayerController>(self).Character;
+            var character = state.GetComponent<PlayerController>(self).Character;
             var characterCommands = state.GetComponent<FirstPersonCharacterControl>(character);
             var characterForward = state.GetForward(character);
             var characterRight = state.GetRight(character);
@@ -69,7 +66,7 @@ namespace Battlemage.PlayerController.Authoring
         {
             if (buttonState.WasPressed.IsSet)
             {
-                var playerController = state.GetComponent<Data.PlayerController>(self);
+                var playerController = state.GetComponent<PlayerController>(self);
                 state.TryActivateAbility(playerController.Character, playerController.PrimaryAbility);
             }
         }

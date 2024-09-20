@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Battlemage.Attributes.Data;
-using Battlemage.Attributes.Systems;
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
-using Waddle.GameplayAttributes.Data;
+using Waddle.Runtime.GameplayAttributes;
 
 namespace Battlemage.Attributes.Authoring
 {

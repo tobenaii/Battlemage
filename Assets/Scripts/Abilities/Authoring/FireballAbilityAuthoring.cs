@@ -1,14 +1,12 @@
-﻿using Battlemage.Attributes.Data;
-using Battlemage.GameplayBehaviours.Data.GameplayEvents;
-using Battlemage.SimpleVelocity.Data;
+﻿using Battlemage.Attributes;
+using Battlemage.GameplayBehaviours.GameplayEvents;
+using Battlemage.SimpleVelocity;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
-using Waddle.GameplayAbilities.Data;
-using Waddle.GameplayBehaviours.Authoring;
-using Waddle.GameplayBehaviours.Data;
-using Waddle.GameplayEffects.Data;
-using Waddle.GameplayEffects.Extensions;
+using Waddle.Runtime.GameplayAbilities;
+using Waddle.Runtime.GameplayBehaviours;
+using Waddle.Runtime.GameplayEffects;
 
 namespace Battlemage.Abilities.Authoring
 {
