@@ -57,7 +57,8 @@ namespace Waddle.Runtime.GameplayEffects
             {
                 Source = source,
                 Target = target,
-                Duration = duration
+                Duration = duration,
+                IsInstant = duration == 0
             });
 
             attributeModifiers.AddRange(_attributeModifiers.AsArray());

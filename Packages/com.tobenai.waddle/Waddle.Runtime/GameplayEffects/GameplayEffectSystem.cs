@@ -57,10 +57,16 @@ namespace Waddle.Runtime.GameplayEffects
                          .WithEntityAccess())
             {
                 var target = gameplayEffect.ValueRO.Target;
-                var isInstant = gameplayEffect.ValueRO.Duration == 0 && state.WorldUnmanaged.IsServer();
-                if (isInstant)
+                var duration = gameplayEffect.ValueRO.Duration;
+                var isInstant = gameplayEffect.ValueRO.IsInstant;
+                duration -= SystemAPI.Time.DeltaTime;
+                if (duration <= 0)
                 {
                     ecb.DestroyEntity(entity);
+                }
+                else
+                {
+                    gameplayEffect.ValueRW.Duration = duration;
                 }
                 foreach (var modifier in attributeModifiers)
                 {
@@ -93,33 +99,22 @@ namespace Waddle.Runtime.GameplayEffects
                         case GameplayAttributeModifier.Operation.Override:
                             break;
                     }
-                    _modificationsMap[key] = modifications;
+                    _modificationsMap[key] = isInstant || duration > 0 ? modifications : default;
                 }
             }
             var attributeBufferLookup = SystemAPI.GetBufferLookup<GameplayAttribute>();
             foreach (var key in _keysToProcess)
             {
-                if (!key.IsPermanent) continue;
                 var modifications = _modificationsMap[key];
                 var attributeBuffer = attributeBufferLookup[key.Target];
                 var attribute = attributeBuffer[key.Attribute];
                 var newValue = (attribute.BaseValue + modifications.Additive) * (1 + modifications.Multiplicative) /
                                (1 + modifications.Division);
                 attribute.CurrentValue = newValue;
-                attribute.BaseValue = newValue;
-                attributeBuffer[key.Attribute] = attribute;
-            }
-            
-            foreach (var key in _keysToProcess)
-            {
-                if (key.IsPermanent) continue;
-                
-                var modifications = _modificationsMap[key];
-                var attributeBuffer = attributeBufferLookup[key.Target];
-                var attribute = attributeBuffer[key.Attribute];
-                var newValue = (attribute.BaseValue + modifications.Additive) * (1 + modifications.Multiplicative) /
-                               (1 + modifications.Division);
-                attribute.CurrentValue = newValue;
+                if (key.IsPermanent)
+                {
+                    attribute.BaseValue = newValue;
+                }
                 attributeBuffer[key.Attribute] = attribute;
             }
             
