@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
@@ -35,10 +36,12 @@ namespace Battlemage.Attributes.Authoring
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 var buffer = AddBuffer<GameplayAttribute>(entity);
-                foreach (var attribute in authoring._attributes)
+                foreach (var attribute in Enum.GetValues(typeof(BattlemageAttribute)))
                 {
-                    var defaultValue = attribute.Value;
-                    buffer.Add(new GameplayAttribute()
+                    var attributeValue =
+                        authoring._attributes.FirstOrDefault(x => x.Attribute == (BattlemageAttribute)attribute);
+                    var defaultValue = attributeValue?.Value ?? 0;
+                    buffer.Add(new GameplayAttribute
                     {
                         BaseValue = defaultValue,
                         CurrentValue = defaultValue
