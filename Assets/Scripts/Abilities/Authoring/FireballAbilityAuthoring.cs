@@ -46,7 +46,7 @@ namespace Battlemage.Abilities.Authoring
             GameplayEffectBuilder.Create(state)
                 .WithAttributeModifier(
                     (byte)BattlemageAttribute.Health,
-                    GameplayAttributeModifier.Operation.Negate,
+                    GameplayAttributeModifier.Operation.Subtract,
                     30)
                 .Apply(abilityData.Source, abilityData.Source);
             DoExplode(ref state, ref self);

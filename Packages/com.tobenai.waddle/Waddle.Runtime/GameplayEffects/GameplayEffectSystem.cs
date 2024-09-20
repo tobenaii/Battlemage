@@ -81,7 +81,7 @@ namespace Waddle.Runtime.GameplayEffects
                         case GameplayAttributeModifier.Operation.Add:
                             modifications.Additive += modifier.Value;
                             break;
-                        case GameplayAttributeModifier.Operation.Negate:
+                        case GameplayAttributeModifier.Operation.Subtract:
                             modifications.Additive -= modifier.Value;
                             break;
                         case GameplayAttributeModifier.Operation.Multiply:

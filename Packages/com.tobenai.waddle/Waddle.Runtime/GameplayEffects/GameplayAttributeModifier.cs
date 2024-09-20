@@ -7,7 +7,7 @@ namespace Waddle.Runtime.GameplayEffects
         public enum Operation
         {
             Add,
-            Negate,
+            Subtract,
             Multiply,
             Divide,
             Override,
