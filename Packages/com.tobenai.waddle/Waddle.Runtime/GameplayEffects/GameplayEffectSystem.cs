@@ -1,6 +1,7 @@
 ﻿using System;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
 using Waddle.Runtime.GameplayAttributes;
 
@@ -110,6 +111,7 @@ namespace Waddle.Runtime.GameplayEffects
                 var attribute = attributeBuffer[key.Attribute];
                 var newValue = (attribute.BaseValue + modifications.Additive) * (1 + modifications.Multiplicative) /
                                (1 + modifications.Division);
+                newValue = math.clamp(newValue, 0, float.MaxValue);
                 attribute.CurrentValue = newValue;
                 if (key.IsPermanent)
                 {
