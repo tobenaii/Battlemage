@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
-using ParrelSync;
+using Unity.Multiplayer.Playmode;
 #endif
+using System.Linq;
 using Unity.Entities;
 using Unity.NetCode;
 
@@ -19,7 +20,8 @@ namespace Battlemage.Game.Systems
             TypeManager.Initialize();
             
 #if UNITY_EDITOR
-            if (!ClonesManager.IsClone())
+            var mppmTags = CurrentPlayer.ReadOnlyTags();
+            if (mppmTags.Contains("Server"))
             {
                 var serverWorld = CreateServerWorld("Server World");
                 var tickRate = new ClientServerTickRate();
