@@ -1,0 +1,30 @@
+{
+    "name": "Battlemage",
+    "rootNamespace": "",
+    "references": [
+        "GUID:734d92eba21c94caba915361bd5ac177",
+        "GUID:953adc2a6b8b4e3c8df5b728bcd546e9",
+        "GUID:8819f35a0fc84499b990e90a4ca1911f",
+        "GUID:63afb046c8423dd448ae7aba042ea63d",
+        "GUID:a5baed0c9693541a5bd947d336ec7659",
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:fba13774ff4078041871f6741c062151",
+        "GUID:1826c0224c0d048b88112c79bbb0cd85",
+        "GUID:767f25efd20d4339a8b1683f8dc1d7d8",
+        "GUID:54568cb559d3bd64da8410f8f6e5bd97",
+        "GUID:90f38e7cb882d7b42848c7e44f1662e0",
+        "GUID:8c4dd21966739024fbd72155091d199e",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
