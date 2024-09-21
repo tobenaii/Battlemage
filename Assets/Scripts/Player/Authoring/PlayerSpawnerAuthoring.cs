@@ -19,7 +19,7 @@ namespace Battlemage.Player.Authoring
         {
             public override void Bake(PlayerSpawnerAuthoring authoring)
             {
-                PlayerSpawner playerSpawner = default(PlayerSpawner);
+                var playerSpawner = default(PlayerSpawner);
                 playerSpawner.Character = GetEntity(authoring._characterPrefab, TransformUsageFlags.Dynamic);
                 playerSpawner.Player = GetEntity(authoring._playerPrefab, TransformUsageFlags.None);
                 var entity = GetEntity(TransformUsageFlags.Dynamic);

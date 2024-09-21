@@ -36,7 +36,7 @@ namespace Battlemage.Networking
     
         public static float GetInputDelta(float currentTickValue, float previousTickValue, float wrapAroundValue = DefaultWrapAroundValue)
         {
-            float delta = currentTickValue - previousTickValue;
+            var delta = currentTickValue - previousTickValue;
         
             // When delta is very large, consider that the input has wrapped around
             if(math.abs(delta) > (wrapAroundValue * 0.5f))

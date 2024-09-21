@@ -48,7 +48,7 @@ namespace Waddle.Runtime.FirstPersonCharacter
 
         private void HandleVelocityControl(ref FirstPersonCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
         { 
-            float deltaTime = baseContext.Time.DeltaTime;
+            var deltaTime = baseContext.Time.DeltaTime;
             var characterComponent = _characterSettings.ValueRO;
 
             ref var characterBody = ref _kinematicCharacterAspect.CharacterBody.ValueRW;
@@ -169,7 +169,7 @@ namespace Waddle.Runtime.FirstPersonCharacter
         {
             ref var characterBody = ref _kinematicCharacterAspect.CharacterBody.ValueRW;
             ref var characterPosition = ref _kinematicCharacterAspect.LocalTransform.ValueRW.Position;
-            CharacterSettings characterComponent = _characterSettings.ValueRO;
+            var characterComponent = _characterSettings.ValueRO;
         
             _kinematicCharacterAspect.Default_OnMovementHit(
                 in this,

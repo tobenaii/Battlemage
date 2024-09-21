@@ -15,7 +15,7 @@ namespace Waddle.Runtime.FirstPersonCharacter
         {
             if (entityManager.HasComponent<RenderFilterSettings>(onEntity))
             {
-                RenderFilterSettings renderFilterSettings =
+                var renderFilterSettings =
                     entityManager.GetSharedComponent<RenderFilterSettings>(onEntity);
                 renderFilterSettings.ShadowCastingMode = mode;
                 ecb.SetSharedComponent(onEntity, renderFilterSettings);
@@ -23,8 +23,8 @@ namespace Waddle.Runtime.FirstPersonCharacter
 
             if (childBufferFromEntity.HasBuffer(onEntity))
             {
-                DynamicBuffer<Child> childBuffer = childBufferFromEntity[onEntity];
-                for (int i = 0; i < childBuffer.Length; i++)
+                var childBuffer = childBufferFromEntity[onEntity];
+                for (var i = 0; i < childBuffer.Length; i++)
                 {
                     SetShadowModeInHierarchy(entityManager, ecb, childBuffer[i].Value, ref childBufferFromEntity, mode);
                 }
@@ -38,8 +38,8 @@ namespace Waddle.Runtime.FirstPersonCharacter
 
             if (childBufferFromEntity.HasBuffer(onEntity))
             {
-                DynamicBuffer<Child> childBuffer = childBufferFromEntity[onEntity];
-                for (int i = 0; i < childBuffer.Length; i++)
+                var childBuffer = childBufferFromEntity[onEntity];
+                for (var i = 0; i < childBuffer.Length; i++)
                 {
                     DisableRenderingInHierarchy(ecb, childBuffer[i].Value, ref childBufferFromEntity);
                 }
@@ -79,7 +79,7 @@ namespace Waddle.Runtime.FirstPersonCharacter
         public static quaternion CalculateLocalViewRotation(float viewPitchDegrees, float viewRollDegrees)
         {
             // Pitch
-            quaternion viewLocalRotation = quaternion.AxisAngle(-math.right(), math.radians(viewPitchDegrees));
+            var viewLocalRotation = quaternion.AxisAngle(-math.right(), math.radians(viewPitchDegrees));
 
             // Roll
             viewLocalRotation = math.mul(viewLocalRotation, quaternion.AxisAngle(math.forward(), math.radians(viewRollDegrees)));

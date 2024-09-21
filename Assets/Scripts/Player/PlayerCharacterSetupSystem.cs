@@ -30,7 +30,7 @@ namespace Battlemage.Player
                 ecb.AddComponent(entity, new PlayerCharacterTag());
                 
                 // Make local character meshes rendering be shadow-only
-                BufferLookup<Child> childBufferLookup = SystemAPI.GetBufferLookup<Child>();
+                var childBufferLookup = SystemAPI.GetBufferLookup<Child>();
                 CharacterUtilities.SetShadowModeInHierarchy(state.EntityManager, ecb, entity, ref childBufferLookup, UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly);
                 
                 ecb.AddComponent<CharacterSetupTag>(entity);

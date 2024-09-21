@@ -19,7 +19,7 @@ namespace Waddle.Authoring.FirstPersonCharacter
             {
                 KinematicCharacterUtilities.BakeCharacter(this, authoring, authoring._characterProperties);
 
-                Entity entity = GetEntity(TransformUsageFlags.Dynamic);
+                var entity = GetEntity(TransformUsageFlags.Dynamic);
             
                 authoring._character.ViewEntity = GetEntity(authoring._viewObject, TransformUsageFlags.Dynamic);
         
