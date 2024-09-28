@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 using Waddle.Runtime.GameplayLifecycle;
 
@@ -22,7 +23,9 @@ namespace Battlemage.Enemy
                     var enemy = ecb.Instantiate(spawnData.ValueRO.EnemyPrefab);
                     ecb.SetComponent(enemy, new LocalTransform()
                     {
-                        Position = spawnData.ValueRO.SpawnPosition
+                        Position = spawnData.ValueRO.SpawnPosition,
+                        Scale = 1,
+                        Rotation = quaternion.identity
                     });
                     timer = spawnData.ValueRO.SpawnDelay;
                 }

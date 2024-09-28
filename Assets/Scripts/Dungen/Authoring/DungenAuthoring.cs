@@ -90,9 +90,8 @@ namespace Battlemage.Dungen
             floor.transform.SetParent(transform);
             floor.GetComponent<MeshRenderer>().material = _material;
             floor.gameObject.AddComponent<NavMeshModifier>();
-            var meshCollider = floor.gameObject.AddComponent<MeshCollider>();
-            meshCollider.convex = true;
-            meshCollider.sharedMesh = floor.GetComponent<MeshFilter>().sharedMesh;
+            floor.gameObject.AddComponent<MeshCollider>();
+            floor.gameObject.isStatic = true;
 
             for (var x = 0; x < _width + 1; x++)
             {
@@ -105,9 +104,8 @@ namespace Battlemage.Dungen
                     wall.transform.SetParent(transform);
                     wall.GetComponent<MeshRenderer>().material = _material;
                     wall.gameObject.AddComponent<NavMeshModifier>();
-                    var boxCollider = wall.gameObject.AddComponent<BoxCollider>();
-                    boxCollider.size = new Vector3(_nodeSize / 10f, 1, _nodeSize);
-                    boxCollider.center = Vector3.zero;
+                    wall.gameObject.AddComponent<BoxCollider>();
+                    wall.gameObject.isStatic = true;
                 }
             }
             
@@ -122,9 +120,8 @@ namespace Battlemage.Dungen
                     wall.transform.SetParent(transform);
                     wall.GetComponent<MeshRenderer>().material = _material;
                     wall.gameObject.AddComponent<NavMeshModifier>();
-                    var boxCollider = wall.gameObject.AddComponent<BoxCollider>();
-                    boxCollider.size = new Vector3(_nodeSize, 1, _nodeSize / 10f);
-                    boxCollider.center = Vector3.zero;
+                    wall.gameObject.AddComponent<BoxCollider>();
+                    wall.gameObject.isStatic = true;
                 }
             }
         }

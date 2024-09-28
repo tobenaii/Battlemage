@@ -1,10 +1,12 @@
 ﻿using Unity.Entities;
-using Unity.Mathematics;
+using Unity.NetCode;
 
-namespace Waddle.Runtime.Pathfinding
+namespace Waddle.Runtime
 {
+    [GhostComponent]
     public struct NavAgent : IComponentData
     {
+        [GhostField]
         public int CurrentWaypoint;
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Unity.Entities;
 using UnityEngine;
+using Waddle.Runtime;
+using Waddle.Runtime.GameplayLifecycle;
 
-namespace Waddle.Runtime.Pathfinding.Authoring
+namespace Waddle.Authoring
 {
     public class NavAgentAuthoring : MonoBehaviour
     {
@@ -12,6 +14,8 @@ namespace Waddle.Runtime.Pathfinding.Authoring
                 var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
                 AddComponent(entity, new NavAgent());
                 AddComponent(entity, new NavTarget());
+                AddComponent(entity, new DestroyEntity());
+                SetComponentEnabled<DestroyEntity>(entity, false);
                 AddBuffer<Waypoint>(entity);
             }
         }

@@ -1,14 +1,16 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.Experimental.AI;
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Waddle.Runtime.Pathfinding
+namespace Waddle.Runtime
 {
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct AgentPathfindingSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)

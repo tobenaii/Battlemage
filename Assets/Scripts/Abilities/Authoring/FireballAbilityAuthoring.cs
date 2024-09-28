@@ -43,12 +43,7 @@ namespace Battlemage.Abilities.Authoring
         {
             var abilityData = state.GetComponent<GameplayAbilityData>(self);
             if (target == abilityData.Source) return;
-            GameplayEffectBuilder.Create(state)
-                .WithAttributeModifier(
-                    (byte)BattlemageAttribute.Health,
-                    GameplayAttributeModifier.Operation.Subtract,
-                    30)
-                .Apply(abilityData.Source, abilityData.Source);
+            state.Destroy(target);
             DoExplode(ref state, ref self);
         }
         

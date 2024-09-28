@@ -43,8 +43,9 @@ GameObject:
   - component: {fileID: 773256635963438152}
   - component: {fileID: 1000740333038971326}
   - component: {fileID: 2574659943703298785}
-  - component: {fileID: 909699775671873743}
   - component: {fileID: 6492213796733899945}
+  - component: {fileID: -5654017405213310374}
+  - component: {fileID: 1773111316743320052}
   - component: {fileID: 8927142062174894355}
   - component: {fileID: 5635315815165837075}
   m_Layer: 0
@@ -99,7 +100,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0279a6c83bdb4ca8bf500f332eb1ea59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!136 &909699775671873743
+--- !u!114 &6492213796733899945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4539118585612032245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c16549610bfe4458aa9389201d072bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!54 &-5654017405213310374
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4539118585612032245}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!136 &1773111316743320052
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,18 +162,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &6492213796733899945
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4539118585612032245}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c16549610bfe4458aa9389201d072bb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8927142062174894355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -146,18 +174,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c79d771cedb4794bf100ce60df5f764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DefaultGhostMode: 0
+  DefaultGhostMode: 1
   SupportedGhostModes: 3
   OptimizationMode: 0
   Importance: 1
   prefabId: abd2a38f867c49b46af8fe0a4ea28f5d
-  HasOwner: 1
-  SupportAutoCommandTarget: 0
+  HasOwner: 0
+  SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
   RollbackPredictedSpawnedGhostState: 0
-  RollbackPredictionOnStructuralChanges: 1
+  RollbackPredictionOnStructuralChanges: 0
 --- !u!114 &5635315815165837075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,6 +199,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ComponentOverrides:
+  - FullTypeName: Unity.Physics.PhysicsVelocity
+    EntityIndex: 0
+    PrefabType: -1
+    SendTypeOptimization: -1
+    VariantHash: 10188360468653526834
   - FullTypeName: Unity.Transforms.LocalTransform
     EntityIndex: 0
     PrefabType: -1

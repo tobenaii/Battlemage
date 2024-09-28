@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Experimental.AI;
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Waddle.Runtime.Pathfinding
+namespace Waddle.Runtime
 {
 //
 // Copyright (c) 2009-2010 Mikko Mononen memon@inside.org

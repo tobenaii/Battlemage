@@ -1,9 +1,9 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Waddle.Runtime.Pathfinding
+namespace Waddle.Runtime
 {
-    public struct Waypoint : IBufferElementData
+    public struct NavTarget : IComponentData
     {
         public float3 Value;
     }

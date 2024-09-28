@@ -1,4 +1,5 @@
 using Battlemage.GameplayBehaviours.InputEvents;
+using Battlemage.Player;
 using Unity.Burst;
 using Unity.CharacterController;
 using Unity.Entities;
@@ -20,7 +21,8 @@ namespace Battlemage.PlayerController.Authoring
             public override void Bake(PlayerControllerAuthoring authoring)
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
-                AddComponent(entity, new PlayerController()
+                AddComponent(entity, new PlayerController());
+                AddComponent(entity, new PlayerAbility()
                 {
                     PrimaryAbility = GetEntity(authoring._primaryAbilityPrefab, TransformUsageFlags.Dynamic)
                 });
@@ -67,7 +69,8 @@ namespace Battlemage.PlayerController.Authoring
             if (buttonState.WasPressed.IsSet)
             {
                 var playerController = state.GetComponent<PlayerController>(self);
-                state.TryActivateAbility(playerController.Character, playerController.PrimaryAbility);
+                var playerAbility = state.GetComponent<PlayerAbility>(self);
+                state.TryActivateAbility(playerController.Character, playerAbility.PrimaryAbility);
             }
         }
     }

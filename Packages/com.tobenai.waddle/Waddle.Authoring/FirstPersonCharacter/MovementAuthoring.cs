@@ -38,6 +38,7 @@ namespace Waddle.Authoring.FirstPersonCharacter
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             foreach (var (characterSettings, entity) in SystemAPI.Query<RefRO<CharacterSettings>>().WithOptions(EntityQueryOptions.IncludePrefab).WithEntityAccess())
             {
+                if (characterSettings.ValueRO.ViewEntity == Entity.Null) continue;
                 if (!SystemAPI.HasComponent<CharacterView>(characterSettings.ValueRO.ViewEntity))
                 {
                     ecb.AddComponent(characterSettings.ValueRO.ViewEntity, new CharacterView { CharacterEntity = entity });

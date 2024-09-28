@@ -13,9 +13,10 @@ namespace Battlemage.Enemy.Authoring
             public override void Bake(EnemySpawnerAuthoring authoring)
             {
                 var entity = GetEntity(authoring, TransformUsageFlags.None);
+                var enemy = GetEntity(authoring._enemyPrefab, TransformUsageFlags.Dynamic);
                 AddComponent(entity, new EnemySpawnData()
                 {
-                    EnemyPrefab = GetEntity(authoring._enemyPrefab, TransformUsageFlags.Dynamic),
+                    EnemyPrefab = enemy,
                     SpawnDelay = authoring._spawnDelay,
                     SpawnPosition = authoring.transform.position
                 });

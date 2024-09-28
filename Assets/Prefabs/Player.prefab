@@ -89,13 +89,15 @@ MonoBehaviour:
   DefaultGhostMode: 2
   SupportedGhostModes: 3
   OptimizationMode: 0
-  Importance: 1
+  Importance: 100
   prefabId: b4df941e35cb4ca1ac0e5b8e45410b1b
   HasOwner: 1
   SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 1
   GhostGroup: 0
   UsePreSerialization: 0
+  RollbackPredictedSpawnedGhostState: 0
+  RollbackPredictionOnStructuralChanges: 1
 --- !u!114 &6729084813064277831
 MonoBehaviour:
   m_ObjectHideFlags: 0

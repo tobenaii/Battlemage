@@ -35,6 +35,7 @@ namespace Battlemage.GameplayBehaviours
         public void OnUpdate(ref SystemState state)
         {
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
+           
             var instantiateEcb = SystemAPI.GetSingletonRW<InstantiateCommandBufferSystem.Singleton>().ValueRW
                 .CreateCommandBuffer(state.WorldUnmanaged);            
             var gameplayState = new GameplayState(state.EntityManager, instantiateEcb, SystemAPI.Time, state.WorldUnmanaged.IsServer());

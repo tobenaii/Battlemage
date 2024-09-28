@@ -80,7 +80,17 @@ namespace Waddle.Runtime.GameplayBehaviours
         
         public void Destroy(Entity entity)
         {
-            _entityManager.SetComponentEnabled<DestroyEntity>(entity, true);
+            if (!_entityManager.HasComponent<DestroyEntity>(entity)) return;
+            if (_isServer)
+            {
+                _entityManager.SetComponentEnabled<DestroyEntity>(entity, true);
+            }
+            else
+            {
+                var transform = _entityManager.GetComponentData<LocalTransform>(entity);
+                transform.Position = new float3(1000, 1000, 1000);
+                _entityManager.SetComponentData(entity, transform);
+            }
         }
 
         public float3 GetForward(Entity entity)
